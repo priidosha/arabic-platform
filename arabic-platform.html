@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مَدار — Платформа арабского</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #161B2E;
+    --panel: #1F2540;
+    --panel-light: #2A3156;
+    --panel-border: #333B63;
+    --gold: #C9A24B;
+    --gold-soft: #E4C583;
+    --teal: #3FBFAD;
+    --text: #F2EFE6;
+    --muted: #9098BB;
+    --rose: #D98B8B;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background: radial-gradient(ellipse at top, #1C2340 0%, #12162A 70%);
+    color: var(--text);
+    font-family:'Manrope', sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .arabic{ font-family:'Amiri', serif; }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+
+  /* ambient geometric pattern */
+  .pattern-bg{
+    position:fixed; inset:0; z-index:0; opacity:0.06; pointer-events:none;
+    background-image:
+      repeating-linear-gradient(45deg, var(--gold) 0, var(--gold) 1px, transparent 1px, transparent 40px),
+      repeating-linear-gradient(-45deg, var(--teal) 0, var(--teal) 1px, transparent 1px, transparent 40px);
+  }
+
+  .app{ position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column; }
+
+  /* ---------- LOGIN SCREEN ---------- */
+  #loginScreen{
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:24px; text-align:center;
+  }
+  .hero-word{
+    font-family:'Amiri', serif; font-size:clamp(64px,14vw,140px); font-weight:700;
+    color:var(--gold-soft);
+    letter-spacing:2px;
+    opacity:0;
+    animation: heroReveal 1.4s ease forwards;
+    text-shadow: 0 0 40px rgba(201,162,75,0.25);
+  }
+  @keyframes heroReveal{
+    0%{ opacity:0; transform:translateY(18px) scale(0.96); filter:blur(6px); }
+    100%{ opacity:1; transform:translateY(0) scale(1); filter:blur(0); }
+  }
+  .hero-sub{
+    margin-top:10px; color:var(--muted); font-size:15px; letter-spacing:0.5px;
+    opacity:0; animation: fadeUp 1s ease 0.6s forwards;
+  }
+  .hero-title{
+    margin-top:26px; font-size:26px; font-weight:800; letter-spacing:-0.3px;
+    opacity:0; animation: fadeUp 1s ease 0.8s forwards;
+  }
+  .hero-desc{
+    margin-top:8px; color:var(--muted); font-size:14.5px; max-width:380px;
+    opacity:0; animation: fadeUp 1s ease 1s forwards;
+  }
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+  .login-card{
+    margin-top:34px; background:var(--panel); border:1px solid var(--panel-border);
+    border-radius:var(--radius); padding:28px; width:100%; max-width:340px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.35);
+    opacity:0; animation: fadeUp 1s ease 1.2s forwards;
+  }
+  .field{ text-align:left; margin-bottom:16px; }
+  .field label{ display:block; font-size:12.5px; color:var(--muted); margin-bottom:6px; letter-spacing:0.3px; }
+  .field input{
+    width:100%; background:var(--panel-light); border:1px solid var(--panel-border);
+    border-radius:9px; padding:11px 13px; color:var(--text); font-size:15px; font-family:inherit;
+    outline:none; transition:border-color 0.2s;
+  }
+  .field input:focus{ border-color:var(--gold); }
+  .btn-primary{
+    width:100%; background:linear-gradient(135deg, var(--gold), #B08A3A); color:#1A1508;
+    border:none; border-radius:9px; padding:12px; font-size:15px; font-weight:700;
+    cursor:pointer; transition:transform 0.15s, box-shadow 0.15s; font-family:inherit;
+  }
+  .btn-primary:hover{ transform:translateY(-1px); box-shadow:0 8px 20px rgba(201,162,75,0.25); }
+  .btn-primary:active{ transform:translateY(0); }
+  .login-error{ color:var(--rose); font-size:13px; margin-top:10px; min-height:16px; }
+  .login-hint{ color:var(--muted); font-size:12px; margin-top:16px; line-height:1.5; }
+
+  /* ---------- APP SHELL ---------- */
+  #appScreen{ display:none; min-height:100vh; flex-direction:column; }
+  header.topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px; border-bottom:1px solid var(--panel-border);
+    background:rgba(22,27,46,0.7); backdrop-filter:blur(8px);
+    position:sticky; top:0; z-index:10;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand-word{ font-family:'Amiri', serif; font-size:24px; color:var(--gold-soft); }
+  .brand-name{ font-size:13px; color:var(--muted); }
+  .student-chip{
+    display:flex; align-items:center; gap:10px; font-size:13.5px; color:var(--muted);
+  }
+  .student-chip strong{ color:var(--text); }
+  .logout-btn{
+    background:none; border:1px solid var(--panel-border); color:var(--muted);
+    border-radius:7px; padding:6px 11px; font-size:12.5px; cursor:pointer; font-family:inherit;
+  }
+  .logout-btn:hover{ color:var(--text); border-color:var(--muted); }
+
+  nav.tabs{
+    display:flex; gap:6px; padding:12px 20px; overflow-x:auto;
+    border-bottom:1px solid var(--panel-border);
+  }
+  .tab-btn{
+    background:none; border:1px solid transparent; color:var(--muted);
+    padding:9px 16px; border-radius:20px; font-size:14px; font-weight:600;
+    cursor:pointer; white-space:nowrap; font-family:inherit; transition:all 0.2s;
+  }
+  .tab-btn.active{ background:var(--panel-light); color:var(--gold-soft); border-color:var(--panel-border); }
+  .tab-btn:hover:not(.active){ color:var(--text); }
+
+  main{ flex:1; padding:26px 20px 60px; max-width:900px; width:100%; margin:0 auto; }
+  .section{ display:none; animation: fadeUp 0.4s ease forwards; }
+  .section.active{ display:block; }
+  .section-title{ font-size:22px; font-weight:800; margin-bottom:4px; }
+  .section-desc{ color:var(--muted); font-size:14px; margin-bottom:22px; }
+
+  /* ---------- ALPHABET ---------- */
+  .letter-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(120px,1fr)); gap:12px; }
+  .letter-card{
+    background:var(--panel); border:1px solid var(--panel-border); border-radius:12px;
+    padding:16px 10px; text-align:center; cursor:pointer; transition:all 0.2s; position:relative;
+  }
+  .letter-card:hover{ border-color:var(--gold); transform:translateY(-2px); }
+  .letter-card.seen::after{
+    content:'✓'; position:absolute; top:6px; right:8px; color:var(--teal); font-size:12px; font-weight:700;
+  }
+  .letter-ar{ font-family:'Amiri', serif; font-size:40px; color:var(--gold-soft); }
+  .letter-translit{ font-size:12px; color:var(--muted); margin-top:6px; }
+  .letter-name{ font-size:11px; color:var(--muted); opacity:0.8; }
+
+  /* ---------- FLASHCARDS ---------- */
+  .category-row{ display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+  .cat-chip{
+    background:var(--panel); border:1px solid var(--panel-border); color:var(--muted);
+    padding:7px 14px; border-radius:20px; font-size:13px; cursor:pointer; font-family:inherit;
+  }
+  .cat-chip.active{ background:var(--teal); color:#0C2A26; border-color:var(--teal); font-weight:700; }
+  .flash-wrap{ display:flex; flex-direction:column; align-items:center; gap:18px; }
+  .flashcard{
+    width:100%; max-width:380px; height:220px; perspective:1200px; cursor:pointer;
+  }
+  .flashcard-inner{
+    position:relative; width:100%; height:100%; transition:transform 0.5s;
+    transform-style:preserve-3d;
+  }
+  .flashcard.flipped .flashcard-inner{ transform:rotateY(180deg); }
+  .flashcard-face{
+    position:absolute; inset:0; backface-visibility:hidden; border-radius:16px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+    border:1px solid var(--panel-border); background:var(--panel); padding:20px;
+  }
+  .flashcard-face.back{ transform:rotateY(180deg); background:var(--panel-light); }
+  .flash-ar{ font-family:'Amiri', serif; font-size:46px; color:var(--gold-soft); }
+  .flash-translit{ color:var(--muted); font-size:14px; }
+  .flash-ru{ font-size:20px; font-weight:700; }
+  .flash-tap-hint{ position:absolute; bottom:12px; font-size:11px; color:var(--muted); opacity:0.6; }
+  .flash-controls{ display:flex; gap:12px; align-items:center; }
+  .flash-nav-btn{
+    background:var(--panel-light); border:1px solid var(--panel-border); color:var(--text);
+    width:38px; height:38px; border-radius:50%; cursor:pointer; font-size:16px;
+  }
+  .flash-progress{ color:var(--muted); font-size:13px; }
+
+  /* ---------- QUIZ ---------- */
+  .quiz-progress-bar{ height:6px; background:var(--panel); border-radius:6px; overflow:hidden; margin-bottom:22px; }
+  .quiz-progress-fill{ height:100%; background:linear-gradient(90deg,var(--teal),var(--gold)); transition:width 0.3s; }
+  .quiz-question{ background:var(--panel); border:1px solid var(--panel-border); border-radius:14px; padding:24px; }
+  .q-arabic{ font-family:'Amiri', serif; font-size:30px; color:var(--gold-soft); margin-bottom:6px; }
+  .q-text{ font-size:16px; margin-bottom:18px; }
+  .q-options{ display:flex; flex-direction:column; gap:10px; }
+  .q-option{
+    background:var(--panel-light); border:1px solid var(--panel-border); color:var(--text);
+    padding:12px 16px; border-radius:9px; text-align:left; cursor:pointer; font-size:14.5px;
+    font-family:inherit; transition:all 0.2s;
+  }
+  .q-option:hover{ border-color:var(--muted); }
+  .q-option.correct{ background:rgba(63,191,173,0.18); border-color:var(--teal); }
+  .q-option.wrong{ background:rgba(217,139,139,0.18); border-color:var(--rose); }
+  .quiz-result{ text-align:center; padding:40px 20px; }
+  .quiz-result-score{ font-size:48px; font-weight:800; color:var(--gold-soft); }
+  .quiz-result-label{ color:var(--muted); margin-top:6px; }
+
+  /* ---------- PROGRESS ---------- */
+  .stat-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-bottom:26px; }
+  .stat-card{ background:var(--panel); border:1px solid var(--panel-border); border-radius:12px; padding:18px; }
+  .stat-num{ font-size:28px; font-weight:800; color:var(--gold-soft); }
+  .stat-label{ font-size:12.5px; color:var(--muted); margin-top:4px; }
+  .history-item{
+    display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--panel-border);
+    font-size:13.5px; color:var(--muted);
+  }
+  .history-item strong{ color:var(--text); }
+  .empty-state{ text-align:center; color:var(--muted); padding:40px 20px; font-size:14px; }
+
+  @media (max-width:480px){
+    .letter-grid{ grid-template-columns:repeat(auto-fill, minmax(90px,1fr)); }
+    .letter-ar{ font-size:32px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="pattern-bg"></div>
+<div class="app">
+
+  <!-- LOGIN -->
+  <div id="loginScreen">
+    <div class="hero-word arabic">مَدار</div>
+    <div class="hero-sub">madār — «орбита», «путь по кругу»</div>
+    <div class="hero-title">Платформа для изучения арабского</div>
+    <div class="hero-desc">Алфавит, карточки, проверка знаний и отслеживание прогресса — в одном месте.</div>
+
+    <div class="login-card">
+      <div class="field">
+        <label>Ваше имя</label>
+        <input type="text" id="nameInput" placeholder="Например, Мария" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Код доступа</label>
+        <input type="text" id="codeInput" placeholder="Код, который дал преподаватель" autocomplete="off">
+      </div>
+      <button class="btn-primary" id="loginBtn">Войти</button>
+      <div class="login-error" id="loginError"></div>
+      <div class="login-hint">Доступ только по коду от преподавателя. Прогресс сохраняется автоматически.</div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="appScreen">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-word arabic">مَدار</div>
+        <div class="brand-name">Арабский язык</div>
+      </div>
+      <div class="student-chip">
+        <span>Ученик: <strong id="studentNameChip"></strong></span>
+        <button class="logout-btn" id="logoutBtn">Выйти</button>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="alphabet">Алфавит</button>
+      <button class="tab-btn" data-tab="flashcards">Карточки</button>
+      <button class="tab-btn" data-tab="quiz">Квиз</button>
+      <button class="tab-btn" data-tab="progress">Прогресс</button>
+    </nav>
+
+    <main>
+      <!-- ALPHABET -->
+      <section class="section active" id="section-alphabet">
+        <div class="section-title">Арабский алфавит</div>
+        <div class="section-desc">Нажмите на букву, чтобы услышать произношение и отметить как изученную.</div>
+        <div class="letter-grid" id="letterGrid"></div>
+      </section>
+
+      <!-- FLASHCARDS -->
+      <section class="section" id="section-flashcards">
+        <div class="section-title">Карточки для повторения</div>
+        <div class="section-desc">Нажмите на карточку, чтобы увидеть перевод.</div>
+        <div class="category-row" id="catRow"></div>
+        <div class="flash-wrap">
+          <div class="flashcard" id="flashcard">
+            <div class="flashcard-inner">
+              <div class="flashcard-face front">
+                <div class="flash-ar arabic" id="flashAr"></div>
+                <div class="flash-translit" id="flashTranslit"></div>
+                <div class="flash-tap-hint">нажмите, чтобы перевернуть</div>
+              </div>
+              <div class="flashcard-face back">
+                <div class="flash-ru" id="flashRu"></div>
+                <div class="flash-tap-hint">нажмите ещё раз</div>
+              </div>
+            </div>
+          </div>
+          <div class="flash-controls">
+            <button class="flash-nav-btn" id="flashPrev">‹</button>
+            <span class="flash-progress" id="flashProgress"></span>
+            <button class="flash-nav-btn" id="flashNext">›</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- QUIZ -->
+      <section class="section" id="section-quiz">
+        <div class="section-title">Проверь себя</div>
+        <div class="section-desc">Короткий квиз по базовой грамматике и лексике.</div>
+        <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quizProgressFill" style="width:0%"></div></div>
+        <div id="quizBody"></div>
+      </section>
+
+      <!-- PROGRESS -->
+      <section class="section" id="section-progress">
+        <div class="section-title">Ваш прогресс</div>
+        <div class="section-desc">Статистика по всем разделам платформы.</div>
+        <div class="stat-grid" id="statGrid"></div>
+        <div>
+          <div style="font-size:15px; font-weight:700; margin-bottom:10px;">История квизов</div>
+          <div id="quizHistory"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+/* ================= DATA ================= */
+const ACCESS_CODE = "arabic2026"; // код, который вы даёте ученикам
+
+const ALPHABET = [
+  ["ا","alif","алиф"],["ب","bā","ба"],["ت","tā","та"],["ث","thā","са"],
+  ["ج","jīm","джим"],["ح","ḥā","ха (глубокое)"],["خ","khā","кха"],["د","dāl","даль"],
+  ["ذ","dhāl","заль"],["ر","rā","ра"],["ز","zāy","зай"],["س","sīn","син"],
+  ["ش","shīn","шин"],["ص","ṣād","сад"],["ض","ḍād","дад"],["ط","ṭā","та (твёрдое)"],
+  ["ظ","ẓā","за (твёрдое)"],["ع","ʿayn","айн"],["غ","ghayn","гайн"],["ف","fā","фа"],
+  ["ق","qāf","каф"],["ك","kāf","кяф"],["ل","lām","лям"],["م","mīm","мим"],
+  ["ن","nūn","нун"],["ه","hā","ха (лёгкое)"],["و","wāw","вав"],["ي","yā","йа"]
+];
+
+const FLASHCARDS = {
+  "Приветствия":[
+    ["مرحبا","marḥaban","Привет"],
+    ["السلام عليكم","as-salāmu ʿalaykum","Мир вам (приветствие)"],
+    ["كيف حالك؟","kayfa ḥāluk?","Как дела?"],
+    ["مع السلامة","maʿa as-salāma","До свидания"]
+  ],
+  "Семья":[
+    ["أب","ab","Отец"],
+    ["أم","umm","Мать"],
+    ["أخ","akh","Брат"],
+    ["أخت","ukht","Сестра"]
+  ],
+  "Числа":[
+    ["واحد","wāḥid","Один"],
+    ["اثنان","ithnān","Два"],
+    ["ثلاثة","thalātha","Три"],
+    ["أربعة","arbaʿa","Четыре"]
+  ],
+  "Фразы":[
+    ["شكرا","shukran","Спасибо"],
+    ["من فضلك","min faḍlik","Пожалуйста (просьба)"],
+    ["نعم","naʿam","Да"],
+    ["لا","lā","Нет"]
+  ]
+};
+
+const QUIZ = [
+  {ar:"بَيْت", q:"Что означает это слово?", options:["Дом","Книга","Дверь"], correct:0},
+  {ar:"", q:"Какая буква пишется по-разному в начале, середине и конце слова?", options:["Все буквы алфавита","Только гласные","Только 'алиф'"], correct:0},
+  {ar:"كِتاب", q:"Что означает это слово?", options:["Стол","Книга","Ручка"], correct:1},
+  {ar:"", q:"Определённый артикль в арабском языке — это:", options:["та (ة)","аль (ال)","ун (ٌ)"], correct:1},
+  {ar:"", q:"Арабское письмо пишется:", options:["Слева направо","Справа налево","Сверху вниз"], correct:1},
+  {ar:"مُدَرِّس", q:"Что означает это слово?", options:["Ученик","Школа","Учитель"], correct:2},
+  {ar:"", q:"Сколько букв в арабском алфавите?", options:["26","28","30"], correct:1},
+  {ar:"شُكْرًا", q:"Что означает это слово?", options:["Спасибо","Извините","Пожалуйста"], correct:0}
+];
+
+/* ================= STATE ================= */
+let studentId = null;
+let studentName = null;
+let currentCat = "Приветствия";
+let flashIndex = 0;
+let quizIndex = 0;
+let quizScore = 0;
+let quizAnswered = false;
+
+/* ================= STORAGE HELPERS ================= */
+async function loadProgress(id){
+  try{
+    const res = await window.storage.get('progress:'+id, true);
+    return res ? JSON.parse(res.value) : { seenLetters:[], quizHistory:[] };
+  }catch(e){
+    return { seenLetters:[], quizHistory:[] };
+  }
+}
+async function saveProgress(id, data){
+  try{ await window.storage.set('progress:'+id, JSON.stringify(data), true); }
+  catch(e){ console.error('save failed', e); }
+}
+let progress = { seenLetters:[], quizHistory:[] };
+
+/* ================= LOGIN ================= */
+document.getElementById('loginBtn').addEventListener('click', doLogin);
+document.getElementById('nameInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+document.getElementById('codeInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+async function doLogin(){
+  const name = document.getElementById('nameInput').value.trim();
+  const code = document.getElementById('codeInput').value.trim();
+  const errEl = document.getElementById('loginError');
+  if(!name){ errEl.textContent = 'Введите имя.'; return; }
+  if(code !== ACCESS_CODE){ errEl.textContent = 'Неверный код доступа.'; return; }
+  errEl.textContent = '';
+  studentName = name;
+  studentId = name.toLowerCase().replace(/\s+/g,'_');
+  progress = await loadProgress(studentId);
+  document.getElementById('studentNameChip').textContent = studentName;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'flex';
+  initAlphabet();
+  initFlashcards();
+  initQuiz();
+  renderProgress();
+}
+
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('nameInput').value='';
+  document.getElementById('codeInput').value='';
+});
+
+/* ================= TABS ================= */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('section-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab === 'progress') renderProgress();
+  });
+});
+
+/* ================= ALPHABET ================= */
+function speak(text){
+  try{
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ar-SA'; u.rate = 0.8;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function initAlphabet(){
+  const grid = document.getElementById('letterGrid');
+  grid.innerHTML = '';
+  ALPHABET.forEach(([ar,translit,name])=>{
+    const card = document.createElement('div');
+    card.className = 'letter-card' + (progress.seenLetters.includes(ar) ? ' seen' : '');
+    card.innerHTML = `<div class="letter-ar arabic">${ar}</div><div class="letter-translit mono">${translit}</div><div class="letter-name">${name}</div>`;
+    card.addEventListener('click', ()=>{
+      speak(ar);
+      if(!progress.seenLetters.includes(ar)){
+        progress.seenLetters.push(ar);
+        saveProgress(studentId, progress);
+        card.classList.add('seen');
+      }
+    });
+    grid.appendChild(card);
+  });
+}
+
+/* ================= FLASHCARDS ================= */
+function initFlashcards(){
+  const catRow = document.getElementById('catRow');
+  catRow.innerHTML = '';
+  Object.keys(FLASHCARDS).forEach(cat=>{
+    const chip = document.createElement('button');
+    chip.className = 'cat-chip' + (cat===currentCat ? ' active' : '');
+    chip.textContent = cat;
+    chip.addEventListener('click', ()=>{
+      currentCat = cat; flashIndex = 0;
+      document.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      renderFlashcard();
+    });
+    catRow.appendChild(chip);
+  });
+  renderFlashcard();
+}
+function renderFlashcard(){
+  const cards = FLASHCARDS[currentCat];
+  const [ar,translit,ru] = cards[flashIndex];
+  document.getElementById('flashAr').textContent = ar;
+  document.getElementById('flashTranslit').textContent = translit;
+  document.getElementById('flashRu').textContent = ru;
+  document.getElementById('flashProgress').textContent = (flashIndex+1)+' / '+cards.length;
+  document.getElementById('flashcard').classList.remove('flipped');
+}
+document.getElementById('flashcard').addEventListener('click', function(){
+  this.classList.toggle('flipped');
+});
+document.getElementById('flashPrev').addEventListener('click', e=>{
+  e.stopPropagation();
+  const cards = FLASHCARDS[currentCat];
+  flashIndex = (flashIndex - 1 + cards.length) % cards.length;
+  renderFlashcard();
+});
+document.getElementById('flashNext').addEventListener('click', e=>{
+  e.stopPropagation();
+  const cards = FLASHCARDS[currentCat];
+  flashIndex = (flashIndex + 1) % cards.length;
+  renderFlashcard();
+});
+
+/* ================= QUIZ ================= */
+function initQuiz(){
+  quizIndex = 0; quizScore = 0; quizAnswered = false;
+  renderQuiz();
+}
+function renderQuiz(){
+  const body = document.getElementById('quizBody');
+  const fill = document.getElementById('quizProgressFill');
+  if(quizIndex >= QUIZ.length){
+    fill.style.width = '100%';
+    const pct = Math.round((quizScore/QUIZ.length)*100);
+    body.innerHTML = `
+      <div class="quiz-result">
+        <div class="quiz-result-score">${quizScore}/${QUIZ.length}</div>
+        <div class="quiz-result-label">Правильных ответов (${pct}%)</div>
+        <button class="btn-primary" style="max-width:200px; margin:22px auto 0;" id="quizRestart">Пройти ещё раз</button>
+      </div>`;
+    document.getElementById('quizRestart').addEventListener('click', initQuiz);
+    progress.quizHistory.push({date:new Date().toISOString(), score:quizScore, total:QUIZ.length});
+    saveProgress(studentId, progress);
+    return;
+  }
+  fill.style.width = Math.round((quizIndex/QUIZ.length)*100)+'%';
+  const q = QUIZ[quizIndex];
+  quizAnswered = false;
+  body.innerHTML = `
+    <div class="quiz-question">
+      ${q.ar ? `<div class="q-arabic arabic">${q.ar}</div>` : ''}
+      <div class="q-text">${q.q}</div>
+      <div class="q-options">
+        ${q.options.map((opt,i)=>`<button class="q-option" data-i="${i}">${opt}</button>`).join('')}
+      </div>
+    </div>`;
+  document.querySelectorAll('.q-option').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(quizAnswered) return;
+      quizAnswered = true;
+      const i = parseInt(btn.dataset.i);
+      document.querySelectorAll('.q-option').forEach(b=>{
+        const bi = parseInt(b.dataset.i);
+        if(bi === q.correct) b.classList.add('correct');
+        else if(bi === i) b.classList.add('wrong');
+      });
+      if(i === q.correct) quizScore++;
+      setTimeout(()=>{ quizIndex++; renderQuiz(); }, 900);
+    });
+  });
+}
+
+/* ================= PROGRESS ================= */
+function renderProgress(){
+  const grid = document.getElementById('statGrid');
+  const totalQuizzes = progress.quizHistory.length;
+  const avgScore = totalQuizzes ? Math.round(progress.quizHistory.reduce((s,h)=>s+(h.score/h.total),0)/totalQuizzes*100) : 0;
+  grid.innerHTML = `
+    <div class="stat-card"><div class="stat-num">${progress.seenLetters.length}/28</div><div class="stat-label">Букв изучено</div></div>
+    <div class="stat-card"><div class="stat-num">${totalQuizzes}</div><div class="stat-label">Квизов пройдено</div></div>
+    <div class="stat-card"><div class="stat-num">${avgScore}%</div><div class="stat-label">Средний результат</div></div>
+  `;
+  const hist = document.getElementById('quizHistory');
+  if(!progress.quizHistory.length){
+    hist.innerHTML = '<div class="empty-state">Пока нет пройденных квизов — попробуйте раздел «Квиз».</div>';
+  } else {
+    hist.innerHTML = progress.quizHistory.slice().reverse().slice(0,10).map(h=>{
+      const d = new Date(h.date);
+      const dateStr = d.toLocaleDateString('ru-RU', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+      return `<div class="history-item"><span>${dateStr}</span><strong>${h.score}/${h.total}</strong></div>`;
+    }).join('');
+  }
+}
+</script>
+</body>
+</html>
