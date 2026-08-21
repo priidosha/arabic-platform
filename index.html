@@ -223,6 +223,29 @@
   .lesson-hw-text{ margin-top:6px; font-size:12.5px; color:var(--gold-soft); display:flex; align-items:center; gap:6px; }
   .hw-check{ width:14px; height:14px; }
 
+  /* ---------- MATERIALS MANAGEMENT ---------- */
+  .mat-form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+  .mat-form-grid .field{ margin-bottom:0; }
+  .mat-list-item{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 12px; background:var(--panel-light); border-radius:9px; margin-bottom:8px; font-size:13.5px;
+    gap:10px;
+  }
+  .mat-list-item-body{ flex:1; min-width:0; }
+  .mat-list-cat{ font-size:11px; color:var(--teal); font-weight:700; text-transform:uppercase; letter-spacing:0.3px; margin-bottom:2px; }
+  .mat-list-main{ display:flex; gap:8px; align-items:baseline; flex-wrap:wrap; }
+  .mat-list-ar{ font-family:'Amiri', serif; font-size:18px; color:var(--gold-soft); }
+  .mat-list-sub{ color:var(--muted); font-size:12px; }
+  .mat-q-options{ margin-top:4px; font-size:12px; color:var(--muted); }
+  .mat-q-correct{ color:var(--teal); font-weight:700; }
+  .mat-seed-btn{
+    background:none; border:1px dashed var(--panel-border); color:var(--muted);
+    border-radius:8px; padding:8px 14px; font-size:12.5px; cursor:pointer; font-family:inherit; margin-bottom:14px;
+  }
+  .mat-seed-btn:hover{ border-color:var(--gold); color:var(--gold-soft); }
+  .radio-row{ display:flex; gap:14px; margin-top:6px; flex-wrap:wrap; }
+  .radio-row label{ display:flex; align-items:center; gap:5px; font-size:12.5px; color:var(--muted); cursor:pointer; }
+
   /* ---------- APP SHELL ---------- */
   #appScreen{ display:none; min-height:100vh; flex-direction:column; }
   header.topbar{
@@ -409,6 +432,7 @@
       <div class="admin-subnav">
         <button class="admin-subnav-btn active" id="adminNavStudents">Ученики</button>
         <button class="admin-subnav-btn" id="adminNavSchedule">Расписание</button>
+        <button class="admin-subnav-btn" id="adminNavMaterials">Карточки и квиз</button>
       </div>
 
       <div class="admin-view active" id="adminViewStudents">
@@ -491,6 +515,42 @@
             <div class="day-panel-title" id="admDayPanelTitle"></div>
             <div id="admDayPanelList"></div>
           </div>
+        </div>
+      </div>
+
+      <div class="admin-view" id="adminViewMaterials">
+        <div class="admin-card">
+          <div class="admin-card-title">Карточки для повторения</div>
+          <button class="mat-seed-btn" id="seedFlashcardsBtn">Загрузить стартовый набор (демо-карточки)</button>
+          <div class="mat-form-grid">
+            <div class="field"><label>Категория</label><input type="text" id="newCardCat" placeholder="Например, Еда" list="catList"><datalist id="catList"></datalist></div>
+            <div class="field"><label>Арабское слово</label><input type="text" id="newCardAr" placeholder="مثال"></div>
+            <div class="field"><label>Транслитерация</label><input type="text" id="newCardTranslit" placeholder="mithāl"></div>
+            <div class="field"><label>Перевод</label><input type="text" id="newCardRu" placeholder="Пример"></div>
+          </div>
+          <button class="btn-primary" id="addCardBtn" style="max-width:200px;">Добавить карточку</button>
+          <div class="login-error" id="cardError"></div>
+          <div style="margin-top:18px;" id="cardsList"></div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-title">Вопросы для квиза</div>
+          <button class="mat-seed-btn" id="seedQuizBtn">Загрузить стартовый набор (демо-вопросы)</button>
+          <div class="field"><label>Арабское слово (необязательно)</label><input type="text" id="newQAr" placeholder="Оставьте пустым, если не нужно"></div>
+          <div class="field"><label>Текст вопроса</label><input type="text" id="newQText" placeholder="Что означает это слово?"></div>
+          <div class="mat-form-grid">
+            <div class="field"><label>Вариант 1</label><input type="text" id="newQOpt0"></div>
+            <div class="field"><label>Вариант 2</label><input type="text" id="newQOpt1"></div>
+            <div class="field"><label>Вариант 3</label><input type="text" id="newQOpt2"></div>
+          </div>
+          <div class="radio-row">
+            <label><input type="radio" name="newQCorrect" value="0" checked> Верный: вариант 1</label>
+            <label><input type="radio" name="newQCorrect" value="1"> Верный: вариант 2</label>
+            <label><input type="radio" name="newQCorrect" value="2"> Верный: вариант 3</label>
+          </div>
+          <button class="btn-primary" id="addQBtn" style="max-width:200px; margin-top:14px;">Добавить вопрос</button>
+          <div class="login-error" id="qError"></div>
+          <div style="margin-top:18px;" id="quizList"></div>
         </div>
       </div>
     </main>
@@ -626,7 +686,7 @@ const ALPHABET = [
   ["ن","nūn","нун"],["ه","hā","ха (лёгкое)"],["و","wāw","вав"],["ي","yā","йа"]
 ];
 
-const FLASHCARDS = {
+const SEED_FLASHCARDS = {
   "Приветствия":[
     ["مرحبا","marḥaban","Привет"],
     ["السلام عليكم","as-salāmu ʿalaykum","Мир вам (приветствие)"],
@@ -653,7 +713,7 @@ const FLASHCARDS = {
   ]
 };
 
-const QUIZ = [
+const SEED_QUIZ = [
   {ar:"بَيْت", q:"Что означает это слово?", options:["Дом","Книга","Дверь"], correct:0},
   {ar:"", q:"Какая буква пишется по-разному в начале, середине и конце слова?", options:["Все буквы алфавита","Только гласные","Только 'алиф'"], correct:0},
   {ar:"كِتاب", q:"Что означает это слово?", options:["Стол","Книга","Ручка"], correct:1},
@@ -667,11 +727,31 @@ const QUIZ = [
 /* ================= STATE ================= */
 let studentId = null;
 let studentName = null;
-let currentCat = "Приветствия";
+let currentCat = null;
 let flashIndex = 0;
 let quizIndex = 0;
 let quizScore = 0;
 let quizAnswered = false;
+let flashcardsData = {}; // { category: [{id,ar,translit,ru}] }
+let quizData = []; // [{id,ar,q,options,correct}]
+
+async function loadFlashcardsData(){
+  try{
+    const snap = await db.collection('flashcards').get();
+    const map = {};
+    snap.docs.forEach(d=>{
+      const c = d.data();
+      (map[c.category] = map[c.category] || []).push({ id:d.id, ar:c.ar, translit:c.translit, ru:c.ru });
+    });
+    return map;
+  }catch(e){ console.error('load flashcards failed', e); return {}; }
+}
+async function loadQuizData(){
+  try{
+    const snap = await db.collection('quizQuestions').get();
+    return snap.docs.map(d=>({ id:d.id, ...d.data() }));
+  }catch(e){ console.error('load quiz failed', e); return []; }
+}
 
 /* ================= STORAGE HELPERS ================= */
 async function loadProgress(id){
@@ -741,8 +821,8 @@ async function doLogin(){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appScreen').style.display = 'flex';
   initAlphabet();
-  initFlashcards();
-  initQuiz();
+  await initFlashcards();
+  await initQuiz();
   renderProgress();
   renderHomeworkBanner();
 }
@@ -776,15 +856,28 @@ document.getElementById('adminLogoutBtn').addEventListener('click', ()=>{
 document.getElementById('adminNavStudents').addEventListener('click', ()=>{
   document.getElementById('adminNavStudents').classList.add('active');
   document.getElementById('adminNavSchedule').classList.remove('active');
+  document.getElementById('adminNavMaterials').classList.remove('active');
   document.getElementById('adminViewStudents').classList.add('active');
   document.getElementById('adminViewSchedule').classList.remove('active');
+  document.getElementById('adminViewMaterials').classList.remove('active');
 });
 document.getElementById('adminNavSchedule').addEventListener('click', async ()=>{
   document.getElementById('adminNavSchedule').classList.add('active');
   document.getElementById('adminNavStudents').classList.remove('active');
+  document.getElementById('adminNavMaterials').classList.remove('active');
   document.getElementById('adminViewSchedule').classList.add('active');
   document.getElementById('adminViewStudents').classList.remove('active');
+  document.getElementById('adminViewMaterials').classList.remove('active');
   await initAdminSchedule();
+});
+document.getElementById('adminNavMaterials').addEventListener('click', async ()=>{
+  document.getElementById('adminNavMaterials').classList.add('active');
+  document.getElementById('adminNavStudents').classList.remove('active');
+  document.getElementById('adminNavSchedule').classList.remove('active');
+  document.getElementById('adminViewMaterials').classList.add('active');
+  document.getElementById('adminViewStudents').classList.remove('active');
+  document.getElementById('adminViewSchedule').classList.remove('active');
+  await renderMaterialsAdmin();
 });
 
 /* ================= ADMIN: ADD / DELETE STUDENTS ================= */
@@ -888,10 +981,20 @@ function initAlphabet(){
 }
 
 /* ================= FLASHCARDS ================= */
-function initFlashcards(){
+async function initFlashcards(){
+  flashcardsData = await loadFlashcardsData();
+  const cats = Object.keys(flashcardsData);
   const catRow = document.getElementById('catRow');
   catRow.innerHTML = '';
-  Object.keys(FLASHCARDS).forEach(cat=>{
+  if(!cats.length){
+    document.querySelector('#section-flashcards .flash-wrap').style.display = 'none';
+    catRow.innerHTML = '<div class="empty-state">Пока нет карточек — преподаватель ещё не добавил материалы для этого раздела.</div>';
+    return;
+  }
+  document.querySelector('#section-flashcards .flash-wrap').style.display = 'flex';
+  if(!currentCat || !cats.includes(currentCat)) currentCat = cats[0];
+  flashIndex = 0;
+  cats.forEach(cat=>{
     const chip = document.createElement('button');
     chip.className = 'cat-chip' + (cat===currentCat ? ' active' : '');
     chip.textContent = cat;
@@ -906,11 +1009,12 @@ function initFlashcards(){
   renderFlashcard();
 }
 function renderFlashcard(){
-  const cards = FLASHCARDS[currentCat];
-  const [ar,translit,ru] = cards[flashIndex];
-  document.getElementById('flashAr').textContent = ar;
-  document.getElementById('flashTranslit').textContent = translit;
-  document.getElementById('flashRu').textContent = ru;
+  const cards = flashcardsData[currentCat];
+  if(!cards || !cards.length) return;
+  const c = cards[flashIndex];
+  document.getElementById('flashAr').textContent = c.ar;
+  document.getElementById('flashTranslit').textContent = c.translit;
+  document.getElementById('flashRu').textContent = c.ru;
   document.getElementById('flashProgress').textContent = (flashIndex+1)+' / '+cards.length;
   document.getElementById('flashcard').classList.remove('flipped');
 }
@@ -919,41 +1023,47 @@ document.getElementById('flashcard').addEventListener('click', function(){
 });
 document.getElementById('flashPrev').addEventListener('click', e=>{
   e.stopPropagation();
-  const cards = FLASHCARDS[currentCat];
+  const cards = flashcardsData[currentCat]; if(!cards) return;
   flashIndex = (flashIndex - 1 + cards.length) % cards.length;
   renderFlashcard();
 });
 document.getElementById('flashNext').addEventListener('click', e=>{
   e.stopPropagation();
-  const cards = FLASHCARDS[currentCat];
+  const cards = flashcardsData[currentCat]; if(!cards) return;
   flashIndex = (flashIndex + 1) % cards.length;
   renderFlashcard();
 });
 
 /* ================= QUIZ ================= */
-function initQuiz(){
+async function initQuiz(){
+  quizData = await loadQuizData();
   quizIndex = 0; quizScore = 0; quizAnswered = false;
   renderQuiz();
 }
 function renderQuiz(){
   const body = document.getElementById('quizBody');
   const fill = document.getElementById('quizProgressFill');
-  if(quizIndex >= QUIZ.length){
+  if(!quizData.length){
+    fill.style.width = '0%';
+    body.innerHTML = '<div class="empty-state">Пока нет вопросов — преподаватель ещё не добавил квиз.</div>';
+    return;
+  }
+  if(quizIndex >= quizData.length){
     fill.style.width = '100%';
-    const pct = Math.round((quizScore/QUIZ.length)*100);
+    const pct = Math.round((quizScore/quizData.length)*100);
     body.innerHTML = `
       <div class="quiz-result">
-        <div class="quiz-result-score">${quizScore}/${QUIZ.length}</div>
+        <div class="quiz-result-score">${quizScore}/${quizData.length}</div>
         <div class="quiz-result-label">Правильных ответов (${pct}%)</div>
         <button class="btn-primary" style="max-width:200px; margin:22px auto 0;" id="quizRestart">Пройти ещё раз</button>
       </div>`;
     document.getElementById('quizRestart').addEventListener('click', initQuiz);
-    progress.quizHistory.push({date:new Date().toISOString(), score:quizScore, total:QUIZ.length});
+    progress.quizHistory.push({date:new Date().toISOString(), score:quizScore, total:quizData.length});
     saveProgress(studentId, progress);
     return;
   }
-  fill.style.width = Math.round((quizIndex/QUIZ.length)*100)+'%';
-  const q = QUIZ[quizIndex];
+  fill.style.width = Math.round((quizIndex/quizData.length)*100)+'%';
+  const q = quizData[quizIndex];
   quizAnswered = false;
   body.innerHTML = `
     <div class="quiz-question">
@@ -1250,6 +1360,116 @@ async function renderHomeworkBanner(){
   };
   banner.classList.add('show');
 }
+
+/* ================= MATERIALS MANAGEMENT (admin) ================= */
+async function renderMaterialsAdmin(){
+  const cardsMap = await loadFlashcardsData();
+  const quiz = await loadQuizData();
+
+  // populate category datalist
+  const catList = document.getElementById('catList');
+  catList.innerHTML = Object.keys(cardsMap).map(c=>`<option value="${c}">`).join('');
+
+  const cardsListEl = document.getElementById('cardsList');
+  const allCards = Object.entries(cardsMap).flatMap(([cat, arr]) => arr.map(c => ({...c, category:cat})));
+  if(!allCards.length){
+    cardsListEl.innerHTML = '<div class="empty-state">Пока нет карточек.</div>';
+  } else {
+    cardsListEl.innerHTML = allCards.map(c => `
+      <div class="mat-list-item">
+        <div class="mat-list-item-body">
+          <div class="mat-list-cat">${c.category}</div>
+          <div class="mat-list-main"><span class="mat-list-ar arabic">${c.ar}</span><span class="mat-list-sub">${c.translit} — ${c.ru}</span></div>
+        </div>
+        <button class="lesson-del-btn" data-del-card="${c.id}">Удалить</button>
+      </div>`).join('');
+    cardsListEl.querySelectorAll('[data-del-card]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        await db.collection('flashcards').doc(btn.dataset.delCard).delete();
+        await renderMaterialsAdmin();
+      });
+    });
+  }
+
+  const quizListEl = document.getElementById('quizList');
+  if(!quiz.length){
+    quizListEl.innerHTML = '<div class="empty-state">Пока нет вопросов.</div>';
+  } else {
+    quizListEl.innerHTML = quiz.map(q => `
+      <div class="mat-list-item">
+        <div class="mat-list-item-body">
+          <div class="mat-list-main">${q.ar ? `<span class="mat-list-ar arabic">${q.ar}</span>` : ''}<span class="mat-list-sub">${q.q}</span></div>
+          <div class="mat-q-options">${q.options.map((o,i)=> i===q.correct ? `<span class="mat-q-correct">${o} ✓</span>` : o).join(' · ')}</div>
+        </div>
+        <button class="lesson-del-btn" data-del-q="${q.id}">Удалить</button>
+      </div>`).join('');
+    quizListEl.querySelectorAll('[data-del-q]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        await db.collection('quizQuestions').doc(btn.dataset.delQ).delete();
+        await renderMaterialsAdmin();
+      });
+    });
+  }
+}
+
+document.getElementById('addCardBtn').addEventListener('click', async ()=>{
+  const errEl = document.getElementById('cardError');
+  const category = document.getElementById('newCardCat').value.trim();
+  const ar = document.getElementById('newCardAr').value.trim();
+  const translit = document.getElementById('newCardTranslit').value.trim();
+  const ru = document.getElementById('newCardRu').value.trim();
+  if(!category || !ar || !ru){ errEl.textContent = 'Заполните категорию, слово и перевод.'; return; }
+  errEl.textContent = '';
+  try{
+    await db.collection('flashcards').add({ category, ar, translit, ru });
+  }catch(e){ console.error(e); errEl.textContent = 'Не удалось сохранить.'; return; }
+  document.getElementById('newCardAr').value = '';
+  document.getElementById('newCardTranslit').value = '';
+  document.getElementById('newCardRu').value = '';
+  await renderMaterialsAdmin();
+});
+
+document.getElementById('addQBtn').addEventListener('click', async ()=>{
+  const errEl = document.getElementById('qError');
+  const ar = document.getElementById('newQAr').value.trim();
+  const q = document.getElementById('newQText').value.trim();
+  const options = [
+    document.getElementById('newQOpt0').value.trim(),
+    document.getElementById('newQOpt1').value.trim(),
+    document.getElementById('newQOpt2').value.trim()
+  ];
+  const correct = parseInt(document.querySelector('input[name="newQCorrect"]:checked').value);
+  if(!q || options.some(o=>!o)){ errEl.textContent = 'Заполните вопрос и все три варианта.'; return; }
+  errEl.textContent = '';
+  try{
+    await db.collection('quizQuestions').add({ ar, q, options, correct });
+  }catch(e){ console.error(e); errEl.textContent = 'Не удалось сохранить.'; return; }
+  document.getElementById('newQAr').value = '';
+  document.getElementById('newQText').value = '';
+  document.getElementById('newQOpt0').value = '';
+  document.getElementById('newQOpt1').value = '';
+  document.getElementById('newQOpt2').value = '';
+  document.querySelector('input[name="newQCorrect"][value="0"]').checked = true;
+  await renderMaterialsAdmin();
+});
+
+document.getElementById('seedFlashcardsBtn').addEventListener('click', async ()=>{
+  if(!confirm('Добавить демо-карточки (Приветствия, Семья, Числа, Фразы) в базу?')) return;
+  const writes = [];
+  Object.entries(SEED_FLASHCARDS).forEach(([category, arr])=>{
+    arr.forEach(([ar,translit,ru])=>{
+      writes.push(db.collection('flashcards').add({ category, ar, translit, ru }));
+    });
+  });
+  await Promise.all(writes);
+  await renderMaterialsAdmin();
+});
+document.getElementById('seedQuizBtn').addEventListener('click', async ()=>{
+  if(!confirm('Добавить демо-вопросы квиза в базу?')) return;
+  const writes = SEED_QUIZ.map(q => db.collection('quizQuestions').add(q));
+  await Promise.all(writes);
+  await renderMaterialsAdmin();
+});
 </script>
 </body>
 </html>
