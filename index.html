@@ -135,6 +135,65 @@
   .del-student-btn:hover{ border-color:var(--rose); }
   .login-cell{ font-family:'JetBrains Mono', monospace; color:var(--gold-soft); }
 
+  /* ---------- CALENDAR / SCHEDULE ---------- */
+  .cal-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .cal-title{ font-size:17px; font-weight:800; text-transform:capitalize; }
+  .cal-nav-btn{
+    background:var(--panel-light); border:1px solid var(--panel-border); color:var(--text);
+    width:34px; height:34px; border-radius:50%; cursor:pointer; font-size:15px;
+  }
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
+  .cal-dow{ text-align:center; font-size:11px; color:var(--muted); padding:4px 0 8px; font-weight:600; }
+  .cal-day{
+    position:relative; aspect-ratio:1; background:var(--panel); border:1px solid var(--panel-border);
+    border-radius:9px; padding:6px; cursor:pointer; transition:all 0.15s; display:flex; flex-direction:column;
+  }
+  .cal-day:hover{ border-color:var(--muted); }
+  .cal-day.empty{ background:none; border:none; cursor:default; }
+  .cal-day.today{ border-color:var(--gold); }
+  .cal-day.selected{ background:var(--panel-light); border-color:var(--teal); }
+  .cal-day-num{ font-size:12.5px; color:var(--muted); }
+  .cal-day.today .cal-day-num{ color:var(--gold-soft); font-weight:700; }
+  .cal-dots{ display:flex; gap:3px; flex-wrap:wrap; margin-top:auto; }
+  .cal-dot{ width:6px; height:6px; border-radius:50%; background:var(--teal); }
+  .cal-dot.group{ background:var(--gold); }
+  .day-panel{
+    margin-top:20px; background:var(--panel); border:1px solid var(--panel-border);
+    border-radius:12px; padding:18px;
+  }
+  .day-panel-title{ font-size:14.5px; font-weight:700; margin-bottom:12px; }
+  .lesson-item{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 12px; background:var(--panel-light); border-radius:9px; margin-bottom:8px; font-size:13.5px;
+  }
+  .lesson-item-info strong{ color:var(--gold-soft); font-family:'JetBrains Mono', monospace; margin-right:8px; }
+  .lesson-item-students{ color:var(--text); }
+  .lesson-item-note{ color:var(--muted); font-size:12px; margin-top:2px; }
+  .lesson-del-btn{
+    background:none; border:1px solid var(--panel-border); color:var(--rose);
+    border-radius:6px; padding:4px 9px; font-size:11.5px; cursor:pointer; font-family:inherit; white-space:nowrap;
+  }
+  .lesson-actions{ display:flex; gap:6px; }
+  .student-check-list{ display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
+  .student-check{
+    display:flex; align-items:center; gap:6px; background:var(--panel-light);
+    border:1px solid var(--panel-border); border-radius:20px; padding:6px 12px; font-size:13px; cursor:pointer;
+  }
+  .student-check.checked{ border-color:var(--teal); color:var(--teal); }
+  .recur-row{ display:flex; align-items:center; gap:10px; margin-top:6px; }
+  .recur-row input[type=checkbox]{ width:16px; height:16px; }
+  .recur-weeks-field{ display:none; align-items:center; gap:8px; }
+  .recur-weeks-field.show{ display:flex; }
+  .recur-weeks-field input{ width:70px; }
+  .admin-subnav{ display:flex; gap:8px; margin-bottom:20px; }
+  .admin-subnav-btn{
+    background:var(--panel); border:1px solid var(--panel-border); color:var(--muted);
+    padding:9px 18px; border-radius:20px; font-size:13.5px; font-weight:600; cursor:pointer; font-family:inherit;
+  }
+  .admin-subnav-btn.active{ background:var(--panel-light); color:var(--gold-soft); border-color:var(--gold); }
+  .admin-view{ display:none; }
+  .admin-view.active{ display:block; }
+
   /* ---------- APP SHELL ---------- */
   #appScreen{ display:none; min-height:100vh; flex-direction:column; }
   header.topbar{
@@ -318,29 +377,92 @@
       <button class="logout-btn" id="adminLogoutBtn">Выйти</button>
     </header>
     <main class="admin-main">
-      <div class="admin-card">
-        <div class="admin-card-title">Добавить ученика</div>
-        <div class="add-student-row">
-          <div class="field">
-            <label>Имя ученика</label>
-            <input type="text" id="newStudentName" placeholder="Например, Мария">
+      <div class="admin-subnav">
+        <button class="admin-subnav-btn active" id="adminNavStudents">Ученики</button>
+        <button class="admin-subnav-btn" id="adminNavSchedule">Расписание</button>
+      </div>
+
+      <div class="admin-view active" id="adminViewStudents">
+        <div class="admin-card">
+          <div class="admin-card-title">Добавить ученика</div>
+          <div class="add-student-row">
+            <div class="field">
+              <label>Имя ученика</label>
+              <input type="text" id="newStudentName" placeholder="Например, Мария">
+            </div>
+            <button class="btn-primary" id="addStudentBtn">Добавить</button>
           </div>
-          <button class="btn-primary" id="addStudentBtn">Добавить</button>
+          <div class="credential-box" id="credentialBox">
+            <div class="credential-row"><span>Логин:</span><strong id="newLoginOut"></strong></div>
+            <div class="credential-row"><span>Код:</span><strong id="newCodeOut"></strong></div>
+          </div>
         </div>
-        <div class="credential-box" id="credentialBox">
-          <div class="credential-row"><span>Логин:</span><strong id="newLoginOut"></strong></div>
-          <div class="credential-row"><span>Код:</span><strong id="newCodeOut"></strong></div>
+        <div class="admin-card">
+          <div class="admin-card-title">Ученики и прогресс</div>
+          <table class="students-table" id="studentsTable">
+            <thead>
+              <tr><th>Имя</th><th>Логин</th><th>Код</th><th>Букв</th><th>Квизов</th><th>Средний балл</th><th></th></tr>
+            </thead>
+            <tbody id="studentsTableBody"></tbody>
+          </table>
+          <div class="empty-state" id="studentsEmpty" style="display:none;">Пока нет добавленных учеников.</div>
         </div>
       </div>
-      <div class="admin-card">
-        <div class="admin-card-title">Ученики и прогресс</div>
-        <table class="students-table" id="studentsTable">
-          <thead>
-            <tr><th>Имя</th><th>Логин</th><th>Код</th><th>Букв</th><th>Квизов</th><th>Средний балл</th><th></th></tr>
-          </thead>
-          <tbody id="studentsTableBody"></tbody>
-        </table>
-        <div class="empty-state" id="studentsEmpty" style="display:none;">Пока нет добавленных учеников.</div>
+
+      <div class="admin-view" id="adminViewSchedule">
+        <div class="admin-card">
+          <div class="admin-card-title">Новое занятие</div>
+          <div class="field">
+            <label>Ученики (можно выбрать нескольких для группового занятия)</label>
+            <div class="student-check-list" id="lessonStudentChecks"></div>
+          </div>
+          <div class="add-student-row" style="margin-top:14px;">
+            <div class="field">
+              <label>Дата</label>
+              <input type="date" id="lessonDate">
+            </div>
+            <div class="field">
+              <label>Время</label>
+              <input type="time" id="lessonTime" value="18:00">
+            </div>
+            <div class="field">
+              <label>Длительность</label>
+              <select id="lessonDuration">
+                <option value="30">30 мин</option>
+                <option value="45">45 мин</option>
+                <option value="60" selected>60 мин</option>
+                <option value="90">90 мин</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Тема / заметка (необязательно)</label>
+            <input type="text" id="lessonNote" placeholder="Например, повторение алфавита">
+          </div>
+          <div class="recur-row">
+            <input type="checkbox" id="lessonRecurring">
+            <label for="lessonRecurring" style="font-size:13.5px; color:var(--muted);">Повторяющееся занятие (каждую неделю)</label>
+          </div>
+          <div class="recur-weeks-field" id="recurWeeksField">
+            <label style="font-size:13px; color:var(--muted);">Количество недель:</label>
+            <input type="number" id="recurWeeksCount" value="8" min="2" max="52">
+          </div>
+          <button class="btn-primary" id="addLessonBtn" style="max-width:220px; margin-top:16px;">Добавить занятие</button>
+          <div class="login-error" id="lessonError"></div>
+        </div>
+
+        <div class="admin-card">
+          <div class="cal-header">
+            <button class="cal-nav-btn" id="admCalPrev">‹</button>
+            <div class="cal-title" id="admCalTitle"></div>
+            <button class="cal-nav-btn" id="admCalNext">›</button>
+          </div>
+          <div class="cal-grid" id="admCalGrid"></div>
+          <div class="day-panel" id="admDayPanel" style="display:none;">
+            <div class="day-panel-title" id="admDayPanelTitle"></div>
+            <div id="admDayPanelList"></div>
+          </div>
+        </div>
       </div>
     </main>
   </div>
@@ -363,6 +485,7 @@
       <button class="tab-btn" data-tab="flashcards">Карточки</button>
       <button class="tab-btn" data-tab="quiz">Квиз</button>
       <button class="tab-btn" data-tab="progress">Прогресс</button>
+      <button class="tab-btn" data-tab="schedule">Расписание</button>
     </nav>
 
     <main>
@@ -416,6 +539,22 @@
         <div>
           <div style="font-size:15px; font-weight:700; margin-bottom:10px;">История квизов</div>
           <div id="quizHistory"></div>
+        </div>
+      </section>
+
+      <!-- SCHEDULE (student, read-only) -->
+      <section class="section" id="section-schedule">
+        <div class="section-title">Расписание занятий</div>
+        <div class="section-desc">Здесь отмечены ваши занятия. Изменить расписание может только преподаватель.</div>
+        <div class="cal-header">
+          <button class="cal-nav-btn" id="stuCalPrev">‹</button>
+          <div class="cal-title" id="stuCalTitle"></div>
+          <button class="cal-nav-btn" id="stuCalNext">›</button>
+        </div>
+        <div class="cal-grid" id="stuCalGrid"></div>
+        <div class="day-panel" id="stuDayPanel" style="display:none;">
+          <div class="day-panel-title" id="stuDayPanelTitle"></div>
+          <div id="stuDayPanelList"></div>
         </div>
       </section>
     </main>
@@ -595,6 +734,20 @@ document.getElementById('adminLogoutBtn').addEventListener('click', ()=>{
   document.getElementById('loginScreen').style.display = 'flex';
 });
 
+document.getElementById('adminNavStudents').addEventListener('click', ()=>{
+  document.getElementById('adminNavStudents').classList.add('active');
+  document.getElementById('adminNavSchedule').classList.remove('active');
+  document.getElementById('adminViewStudents').classList.add('active');
+  document.getElementById('adminViewSchedule').classList.remove('active');
+});
+document.getElementById('adminNavSchedule').addEventListener('click', async ()=>{
+  document.getElementById('adminNavSchedule').classList.add('active');
+  document.getElementById('adminNavStudents').classList.remove('active');
+  document.getElementById('adminViewSchedule').classList.add('active');
+  document.getElementById('adminViewStudents').classList.remove('active');
+  await initAdminSchedule();
+});
+
 /* ================= ADMIN: ADD / DELETE STUDENTS ================= */
 document.getElementById('addStudentBtn').addEventListener('click', addStudent);
 document.getElementById('newStudentName').addEventListener('keydown', e=>{ if(e.key==='Enter') addStudent(); });
@@ -664,6 +817,7 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     btn.classList.add('active');
     document.getElementById('section-'+btn.dataset.tab).classList.add('active');
     if(btn.dataset.tab === 'progress') renderProgress();
+    if(btn.dataset.tab === 'schedule') initStudentSchedule();
   });
 });
 
@@ -807,6 +961,202 @@ function renderProgress(){
     }).join('');
   }
 }
+
+/* ================= SCHEDULE ================= */
+const DOW_LABELS = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+const MONTH_LABELS = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+
+async function loadLessons(){
+  try{
+    const snap = await db.collection('lessons').get();
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }catch(e){ console.error('load lessons failed', e); return []; }
+}
+function fmtDate(y,m,d){ return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
+function todayStr(){ const t = new Date(); return fmtDate(t.getFullYear(), t.getMonth(), t.getDate()); }
+
+function buildCalendarGrid(gridEl, year, month, lessonsByDate, onDayClick, selectedDate){
+  gridEl.innerHTML = '';
+  DOW_LABELS.forEach(l=>{
+    const el = document.createElement('div');
+    el.className = 'cal-dow'; el.textContent = l;
+    gridEl.appendChild(el);
+  });
+  const firstDow = (new Date(year, month, 1).getDay() + 6) % 7; // Monday-first
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const today = todayStr();
+  for(let i=0;i<firstDow;i++){
+    const empty = document.createElement('div');
+    empty.className = 'cal-day empty';
+    gridEl.appendChild(empty);
+  }
+  for(let d=1; d<=daysInMonth; d++){
+    const dateStr = fmtDate(year, month, d);
+    const cell = document.createElement('div');
+    cell.className = 'cal-day' + (dateStr===today?' today':'') + (dateStr===selectedDate?' selected':'');
+    const lessons = lessonsByDate[dateStr] || [];
+    cell.innerHTML = `<div class="cal-day-num">${d}</div><div class="cal-dots">${lessons.slice(0,4).map(l=>`<div class="cal-dot${l.studentIds.length>1?' group':''}"></div>`).join('')}</div>`;
+    cell.addEventListener('click', ()=> onDayClick(dateStr));
+    gridEl.appendChild(cell);
+  }
+}
+function groupLessonsByDate(lessons){
+  const map = {};
+  lessons.forEach(l=>{ (map[l.date] = map[l.date] || []).push(l); });
+  Object.values(map).forEach(arr => arr.sort((a,b)=> a.time.localeCompare(b.time)));
+  return map;
+}
+function studentNamesFor(ids, roster){
+  return ids.map(id => (roster.find(s=>s.id===id) || {name:id}).name).join(', ');
+}
+
+/* ---- ADMIN CALENDAR ---- */
+let admCalYear, admCalMonth, admSelectedDate = null, admLessonsCache = [];
+async function initAdminSchedule(){
+  const now = new Date();
+  admCalYear = now.getFullYear(); admCalMonth = now.getMonth();
+  roster = await loadRoster();
+  renderLessonStudentChecks();
+  await renderAdminCalendar();
+}
+function renderLessonStudentChecks(){
+  const wrap = document.getElementById('lessonStudentChecks');
+  if(!roster.length){ wrap.innerHTML = '<span style="color:var(--muted); font-size:13px;">Сначала добавьте учеников во вкладке «Ученики».</span>'; return; }
+  wrap.innerHTML = roster.map(s=>`<div class="student-check" data-id="${s.id}">${s.name}</div>`).join('');
+  wrap.querySelectorAll('.student-check').forEach(el=>{
+    el.addEventListener('click', ()=> el.classList.toggle('checked'));
+  });
+}
+async function renderAdminCalendar(){
+  admLessonsCache = await loadLessons();
+  const byDate = groupLessonsByDate(admLessonsCache);
+  document.getElementById('admCalTitle').textContent = `${MONTH_LABELS[admCalMonth]} ${admCalYear}`;
+  buildCalendarGrid(document.getElementById('admCalGrid'), admCalYear, admCalMonth, byDate, showAdminDay, admSelectedDate);
+  if(admSelectedDate) showAdminDay(admSelectedDate);
+}
+function showAdminDay(dateStr){
+  admSelectedDate = dateStr;
+  const byDate = groupLessonsByDate(admLessonsCache);
+  buildCalendarGrid(document.getElementById('admCalGrid'), admCalYear, admCalMonth, byDate, showAdminDay, admSelectedDate);
+  const panel = document.getElementById('admDayPanel');
+  const list = document.getElementById('admDayPanelList');
+  const d = new Date(dateStr+'T00:00:00');
+  document.getElementById('admDayPanelTitle').textContent = d.toLocaleDateString('ru-RU', {day:'numeric', month:'long', weekday:'long'});
+  const lessons = byDate[dateStr] || [];
+  panel.style.display = 'block';
+  if(!lessons.length){
+    list.innerHTML = '<div class="empty-state" style="padding:16px 0;">Занятий нет.</div>';
+    return;
+  }
+  list.innerHTML = lessons.map(l => `
+    <div class="lesson-item">
+      <div class="lesson-item-info">
+        <strong>${l.time}</strong><span class="lesson-item-students">${studentNamesFor(l.studentIds, roster)} · ${l.duration} мин</span>
+        ${l.note ? `<div class="lesson-item-note">${l.note}</div>` : ''}
+      </div>
+      <div class="lesson-actions">
+        <button class="lesson-del-btn" data-id="${l.id}" data-mode="one">Удалить</button>
+        ${l.seriesId ? `<button class="lesson-del-btn" data-series="${l.seriesId}" data-date="${l.date}" data-mode="series">Всю серию</button>` : ''}
+      </div>
+    </div>`).join('');
+  list.querySelectorAll('[data-mode="one"]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{ await db.collection('lessons').doc(btn.dataset.id).delete(); await renderAdminCalendar(); });
+  });
+  list.querySelectorAll('[data-mode="series"]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const toDelete = admLessonsCache.filter(l => l.seriesId === btn.dataset.series && l.date >= btn.dataset.date);
+      await Promise.all(toDelete.map(l => db.collection('lessons').doc(l.id).delete()));
+      await renderAdminCalendar();
+    });
+  });
+}
+document.getElementById('admCalPrev').addEventListener('click', ()=>{
+  admCalMonth--; if(admCalMonth<0){ admCalMonth=11; admCalYear--; } admSelectedDate=null;
+  document.getElementById('admDayPanel').style.display='none'; renderAdminCalendar();
+});
+document.getElementById('admCalNext').addEventListener('click', ()=>{
+  admCalMonth++; if(admCalMonth>11){ admCalMonth=0; admCalYear++; } admSelectedDate=null;
+  document.getElementById('admDayPanel').style.display='none'; renderAdminCalendar();
+});
+document.getElementById('lessonRecurring').addEventListener('change', function(){
+  document.getElementById('recurWeeksField').classList.toggle('show', this.checked);
+});
+document.getElementById('addLessonBtn').addEventListener('click', async ()=>{
+  const errEl = document.getElementById('lessonError');
+  errEl.textContent = '';
+  const ids = Array.from(document.querySelectorAll('.student-check.checked')).map(el=>el.dataset.id);
+  const date = document.getElementById('lessonDate').value;
+  const time = document.getElementById('lessonTime').value;
+  const duration = parseInt(document.getElementById('lessonDuration').value);
+  const note = document.getElementById('lessonNote').value.trim();
+  const recurring = document.getElementById('lessonRecurring').checked;
+  const weeks = parseInt(document.getElementById('recurWeeksCount').value) || 1;
+  if(!ids.length){ errEl.textContent = 'Выберите хотя бы одного ученика.'; return; }
+  if(!date){ errEl.textContent = 'Укажите дату.'; return; }
+  const seriesId = recurring ? ('s'+Date.now()) : null;
+  const count = recurring ? weeks : 1;
+  const baseDate = new Date(date+'T00:00:00');
+  try{
+    const batchWrites = [];
+    for(let i=0;i<count;i++){
+      const d = new Date(baseDate); d.setDate(d.getDate() + i*7);
+      const dateStr = fmtDate(d.getFullYear(), d.getMonth(), d.getDate());
+      batchWrites.push(db.collection('lessons').add({ studentIds: ids, date: dateStr, time, duration, note, seriesId }));
+    }
+    await Promise.all(batchWrites);
+  }catch(e){ console.error(e); errEl.textContent = 'Не удалось сохранить занятие.'; return; }
+  document.querySelectorAll('.student-check.checked').forEach(el=>el.classList.remove('checked'));
+  document.getElementById('lessonNote').value = '';
+  document.getElementById('lessonRecurring').checked = false;
+  document.getElementById('recurWeeksField').classList.remove('show');
+  await renderAdminCalendar();
+});
+
+/* ---- STUDENT CALENDAR (read-only) ---- */
+let stuCalYear, stuCalMonth, stuSelectedDate = null, stuLessonsCache = [];
+async function initStudentSchedule(){
+  const now = new Date();
+  stuCalYear = now.getFullYear(); stuCalMonth = now.getMonth();
+  await renderStudentCalendar();
+}
+async function renderStudentCalendar(){
+  const all = await loadLessons();
+  stuLessonsCache = all.filter(l => l.studentIds.includes(studentId));
+  const byDate = groupLessonsByDate(stuLessonsCache);
+  document.getElementById('stuCalTitle').textContent = `${MONTH_LABELS[stuCalMonth]} ${stuCalYear}`;
+  buildCalendarGrid(document.getElementById('stuCalGrid'), stuCalYear, stuCalMonth, byDate, showStudentDay, stuSelectedDate);
+  if(stuSelectedDate) showStudentDay(stuSelectedDate);
+}
+function showStudentDay(dateStr){
+  stuSelectedDate = dateStr;
+  const byDate = groupLessonsByDate(stuLessonsCache);
+  buildCalendarGrid(document.getElementById('stuCalGrid'), stuCalYear, stuCalMonth, byDate, showStudentDay, stuSelectedDate);
+  const panel = document.getElementById('stuDayPanel');
+  const list = document.getElementById('stuDayPanelList');
+  const d = new Date(dateStr+'T00:00:00');
+  document.getElementById('stuDayPanelTitle').textContent = d.toLocaleDateString('ru-RU', {day:'numeric', month:'long', weekday:'long'});
+  const lessons = byDate[dateStr] || [];
+  panel.style.display = 'block';
+  if(!lessons.length){
+    list.innerHTML = '<div class="empty-state" style="padding:16px 0;">Занятий нет.</div>';
+    return;
+  }
+  list.innerHTML = lessons.map(l => `
+    <div class="lesson-item">
+      <div class="lesson-item-info">
+        <strong>${l.time}</strong><span class="lesson-item-students">${l.duration} мин${l.studentIds.length>1 ? ' · групповое' : ''}</span>
+        ${l.note ? `<div class="lesson-item-note">${l.note}</div>` : ''}
+      </div>
+    </div>`).join('');
+}
+document.getElementById('stuCalPrev').addEventListener('click', ()=>{
+  stuCalMonth--; if(stuCalMonth<0){ stuCalMonth=11; stuCalYear--; } stuSelectedDate=null;
+  document.getElementById('stuDayPanel').style.display='none'; renderStudentCalendar();
+});
+document.getElementById('stuCalNext').addEventListener('click', ()=>{
+  stuCalMonth++; if(stuCalMonth>11){ stuCalMonth=0; stuCalYear++; } stuSelectedDate=null;
+  document.getElementById('stuDayPanel').style.display='none'; renderStudentCalendar();
+});
 </script>
 </body>
 </html>
