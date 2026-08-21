@@ -536,6 +536,7 @@
         <div class="admin-card">
           <div class="admin-card-title">Вопросы для квиза</div>
           <button class="mat-seed-btn" id="seedQuizBtn">Загрузить стартовый набор (демо-вопросы)</button>
+          <div class="field"><label>Название квиза</label><input type="text" id="newQQuizName" placeholder="Например, Алфавит и базовая лексика" list="quizNameList"><datalist id="quizNameList"></datalist></div>
           <div class="field"><label>Арабское слово (необязательно)</label><input type="text" id="newQAr" placeholder="Оставьте пустым, если не нужно"></div>
           <div class="field"><label>Текст вопроса</label><input type="text" id="newQText" placeholder="Что означает это слово?"></div>
           <div class="mat-form-grid">
@@ -624,8 +625,9 @@
       <!-- QUIZ -->
       <section class="section" id="section-quiz">
         <div class="section-title">Проверь себя</div>
-        <div class="section-desc">Короткий квиз по базовой грамматике и лексике.</div>
-        <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quizProgressFill" style="width:0%"></div></div>
+        <div class="section-desc">Выберите квиз и проверьте свои знания.</div>
+        <div class="category-row" id="quizCatRow"></div>
+        <div class="quiz-progress-bar" id="quizProgressBar" style="display:none;"><div class="quiz-progress-fill" id="quizProgressFill" style="width:0%"></div></div>
         <div id="quizBody"></div>
       </section>
 
@@ -733,7 +735,8 @@ let quizIndex = 0;
 let quizScore = 0;
 let quizAnswered = false;
 let flashcardsData = {}; // { category: [{id,ar,translit,ru}] }
-let quizData = []; // [{id,ar,q,options,correct}]
+let quizzesData = {}; // { quizName: [{id,ar,q,options,correct}] }
+let currentQuizName = null;
 
 async function loadFlashcardsData(){
   try{
@@ -746,11 +749,17 @@ async function loadFlashcardsData(){
     return map;
   }catch(e){ console.error('load flashcards failed', e); return {}; }
 }
-async function loadQuizData(){
+async function loadQuizzesData(){
   try{
     const snap = await db.collection('quizQuestions').get();
-    return snap.docs.map(d=>({ id:d.id, ...d.data() }));
-  }catch(e){ console.error('load quiz failed', e); return []; }
+    const map = {};
+    snap.docs.forEach(d=>{
+      const q = d.data();
+      const name = q.quizName || 'Общий квиз';
+      (map[name] = map[name] || []).push({ id:d.id, ar:q.ar, q:q.q, options:q.options, correct:q.correct });
+    });
+    return map;
+  }catch(e){ console.error('load quizzes failed', e); return {}; }
 }
 
 /* ================= STORAGE HELPERS ================= */
@@ -1036,18 +1045,44 @@ document.getElementById('flashNext').addEventListener('click', e=>{
 
 /* ================= QUIZ ================= */
 async function initQuiz(){
-  quizData = await loadQuizData();
+  quizzesData = await loadQuizzesData();
+  const names = Object.keys(quizzesData);
+  const catRow = document.getElementById('quizCatRow');
+  const bar = document.getElementById('quizProgressBar');
+  catRow.innerHTML = '';
+  if(!names.length){
+    bar.style.display = 'none';
+    document.getElementById('quizBody').innerHTML = '<div class="empty-state">Пока нет вопросов — преподаватель ещё не добавил квиз.</div>';
+    return;
+  }
+  names.forEach(name=>{
+    const chip = document.createElement('button');
+    chip.className = 'cat-chip' + (name===currentQuizName ? ' active' : '');
+    chip.textContent = name;
+    chip.addEventListener('click', ()=>{
+      currentQuizName = name;
+      document.querySelectorAll('#quizCatRow .cat-chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      startQuiz();
+    });
+    catRow.appendChild(chip);
+  });
+  if(!currentQuizName || !names.includes(currentQuizName)){
+    document.getElementById('quizBody').innerHTML = '<div class="empty-state">Выберите квиз выше, чтобы начать.</div>';
+    bar.style.display = 'none';
+    return;
+  }
+  startQuiz();
+}
+function startQuiz(){
   quizIndex = 0; quizScore = 0; quizAnswered = false;
+  document.getElementById('quizProgressBar').style.display = 'block';
   renderQuiz();
 }
 function renderQuiz(){
+  const quizData = quizzesData[currentQuizName] || [];
   const body = document.getElementById('quizBody');
   const fill = document.getElementById('quizProgressFill');
-  if(!quizData.length){
-    fill.style.width = '0%';
-    body.innerHTML = '<div class="empty-state">Пока нет вопросов — преподаватель ещё не добавил квиз.</div>';
-    return;
-  }
   if(quizIndex >= quizData.length){
     fill.style.width = '100%';
     const pct = Math.round((quizScore/quizData.length)*100);
@@ -1057,8 +1092,8 @@ function renderQuiz(){
         <div class="quiz-result-label">Правильных ответов (${pct}%)</div>
         <button class="btn-primary" style="max-width:200px; margin:22px auto 0;" id="quizRestart">Пройти ещё раз</button>
       </div>`;
-    document.getElementById('quizRestart').addEventListener('click', initQuiz);
-    progress.quizHistory.push({date:new Date().toISOString(), score:quizScore, total:quizData.length});
+    document.getElementById('quizRestart').addEventListener('click', startQuiz);
+    progress.quizHistory.push({date:new Date().toISOString(), score:quizScore, total:quizData.length, quizName:currentQuizName});
     saveProgress(studentId, progress);
     return;
   }
@@ -1106,7 +1141,7 @@ function renderProgress(){
     hist.innerHTML = progress.quizHistory.slice().reverse().slice(0,10).map(h=>{
       const d = new Date(h.date);
       const dateStr = d.toLocaleDateString('ru-RU', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
-      return `<div class="history-item"><span>${dateStr}</span><strong>${h.score}/${h.total}</strong></div>`;
+      return `<div class="history-item"><span>${h.quizName ? h.quizName+' · ' : ''}${dateStr}</span><strong>${h.score}/${h.total}</strong></div>`;
     }).join('');
   }
 }
@@ -1364,11 +1399,11 @@ async function renderHomeworkBanner(){
 /* ================= MATERIALS MANAGEMENT (admin) ================= */
 async function renderMaterialsAdmin(){
   const cardsMap = await loadFlashcardsData();
-  const quiz = await loadQuizData();
+  const quizzesMap = await loadQuizzesData();
 
-  // populate category datalist
-  const catList = document.getElementById('catList');
-  catList.innerHTML = Object.keys(cardsMap).map(c=>`<option value="${c}">`).join('');
+  // populate category / quiz name datalists
+  document.getElementById('catList').innerHTML = Object.keys(cardsMap).map(c=>`<option value="${c}">`).join('');
+  document.getElementById('quizNameList').innerHTML = Object.keys(quizzesMap).map(n=>`<option value="${n}">`).join('');
 
   const cardsListEl = document.getElementById('cardsList');
   const allCards = Object.entries(cardsMap).flatMap(([cat, arr]) => arr.map(c => ({...c, category:cat})));
@@ -1392,16 +1427,21 @@ async function renderMaterialsAdmin(){
   }
 
   const quizListEl = document.getElementById('quizList');
-  if(!quiz.length){
+  const quizNames = Object.keys(quizzesMap);
+  if(!quizNames.length){
     quizListEl.innerHTML = '<div class="empty-state">Пока нет вопросов.</div>';
   } else {
-    quizListEl.innerHTML = quiz.map(q => `
-      <div class="mat-list-item">
-        <div class="mat-list-item-body">
-          <div class="mat-list-main">${q.ar ? `<span class="mat-list-ar arabic">${q.ar}</span>` : ''}<span class="mat-list-sub">${q.q}</span></div>
-          <div class="mat-q-options">${q.options.map((o,i)=> i===q.correct ? `<span class="mat-q-correct">${o} ✓</span>` : o).join(' · ')}</div>
-        </div>
-        <button class="lesson-del-btn" data-del-q="${q.id}">Удалить</button>
+    quizListEl.innerHTML = quizNames.map(name => `
+      <div style="margin-bottom:16px;">
+        <div class="mat-list-cat" style="margin-bottom:6px;">${name} (${quizzesMap[name].length})</div>
+        ${quizzesMap[name].map(q => `
+          <div class="mat-list-item">
+            <div class="mat-list-item-body">
+              <div class="mat-list-main">${q.ar ? `<span class="mat-list-ar arabic">${q.ar}</span>` : ''}<span class="mat-list-sub">${q.q}</span></div>
+              <div class="mat-q-options">${q.options.map((o,i)=> i===q.correct ? `<span class="mat-q-correct">${o} ✓</span>` : o).join(' · ')}</div>
+            </div>
+            <button class="lesson-del-btn" data-del-q="${q.id}">Удалить</button>
+          </div>`).join('')}
       </div>`).join('');
     quizListEl.querySelectorAll('[data-del-q]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
@@ -1431,6 +1471,7 @@ document.getElementById('addCardBtn').addEventListener('click', async ()=>{
 
 document.getElementById('addQBtn').addEventListener('click', async ()=>{
   const errEl = document.getElementById('qError');
+  const quizName = document.getElementById('newQQuizName').value.trim();
   const ar = document.getElementById('newQAr').value.trim();
   const q = document.getElementById('newQText').value.trim();
   const options = [
@@ -1439,10 +1480,10 @@ document.getElementById('addQBtn').addEventListener('click', async ()=>{
     document.getElementById('newQOpt2').value.trim()
   ];
   const correct = parseInt(document.querySelector('input[name="newQCorrect"]:checked').value);
-  if(!q || options.some(o=>!o)){ errEl.textContent = 'Заполните вопрос и все три варианта.'; return; }
+  if(!quizName || !q || options.some(o=>!o)){ errEl.textContent = 'Заполните название квиза, вопрос и все три варианта.'; return; }
   errEl.textContent = '';
   try{
-    await db.collection('quizQuestions').add({ ar, q, options, correct });
+    await db.collection('quizQuestions').add({ quizName, ar, q, options, correct });
   }catch(e){ console.error(e); errEl.textContent = 'Не удалось сохранить.'; return; }
   document.getElementById('newQAr').value = '';
   document.getElementById('newQText').value = '';
@@ -1465,8 +1506,8 @@ document.getElementById('seedFlashcardsBtn').addEventListener('click', async ()=
   await renderMaterialsAdmin();
 });
 document.getElementById('seedQuizBtn').addEventListener('click', async ()=>{
-  if(!confirm('Добавить демо-вопросы квиза в базу?')) return;
-  const writes = SEED_QUIZ.map(q => db.collection('quizQuestions').add(q));
+  if(!confirm('Добавить демо-квиз "Алфавит и базовая лексика" в базу?')) return;
+  const writes = SEED_QUIZ.map(q => db.collection('quizQuestions').add({ ...q, quizName: 'Алфавит и базовая лексика' }));
   await Promise.all(writes);
   await renderMaterialsAdmin();
 });
