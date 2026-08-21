@@ -260,6 +260,9 @@
     *{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
   }
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -420,6 +423,19 @@
 </div>
 
 <script>
+/* ================= FIREBASE ================= */
+// ЗАМЕНИТЕ на конфигурацию из вашего проекта Firebase (Project settings → General → Your apps)
+const firebaseConfig = {
+  apiKey: "AIzaSyAZWOdHJp-Kf3ovQlXnSapA8NE_oFCLbgk",
+  authDomain: "arabic-platform-fc465.firebaseapp.com",
+  projectId: "arabic-platform-fc465",
+  storageBucket: "arabic-platform-fc465.firebasestorage.app",
+  messagingSenderId: "615684896413",
+  appId: "1:615684896413:web:bcfc206d14843bebc8c674"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 /* ================= DATA ================= */
 const TEACHER_PASSWORD = "teacher2026"; // поменяйте на свой пароль
 
@@ -483,14 +499,15 @@ let quizAnswered = false;
 /* ================= STORAGE HELPERS ================= */
 async function loadProgress(id){
   try{
-    const res = await window.storage.get('progress:'+id, true);
-    return res ? JSON.parse(res.value) : { seenLetters:[], quizHistory:[] };
+    const doc = await db.collection('progress').doc(id).get();
+    return doc.exists ? doc.data() : { seenLetters:[], quizHistory:[] };
   }catch(e){
+    console.error('load progress failed', e);
     return { seenLetters:[], quizHistory:[] };
   }
 }
 async function saveProgress(id, data){
-  try{ await window.storage.set('progress:'+id, JSON.stringify(data), true); }
+  try{ await db.collection('progress').doc(id).set(data); }
   catch(e){ console.error('save failed', e); }
 }
 let progress = { seenLetters:[], quizHistory:[] };
@@ -498,13 +515,9 @@ let roster = []; // [{id, name, code}]
 
 async function loadRoster(){
   try{
-    const res = await window.storage.get('roster', true);
-    return res ? JSON.parse(res.value) : [];
-  }catch(e){ return []; }
-}
-async function saveRoster(list){
-  try{ await window.storage.set('roster', JSON.stringify(list), true); }
-  catch(e){ console.error('roster save failed', e); }
+    const snap = await db.collection('students').get();
+    return snap.docs.map(d => ({ id: d.id, name: d.data().name, code: d.data().code }));
+  }catch(e){ console.error('load roster failed', e); return []; }
 }
 function transliterateSlug(name){
   const map = {а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'c',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'};
@@ -537,8 +550,11 @@ async function doLogin(){
   const code = document.getElementById('codeInput').value.trim();
   const errEl = document.getElementById('loginError');
   if(!login || !code){ errEl.textContent = 'Введите логин и код.'; return; }
-  roster = await loadRoster();
-  const student = roster.find(s => s.id === login && s.code === code);
+  let student = null;
+  try{
+    const doc = await db.collection('students').doc(login).get();
+    if(doc.exists && doc.data().code === code){ student = { id: login, name: doc.data().name, code: doc.data().code }; }
+  }catch(e){ console.error('login check failed', e); }
   if(!student){ errEl.textContent = 'Логин или код неверны. Уточните у преподавателя.'; return; }
   errEl.textContent = '';
   studentName = student.name;
@@ -592,8 +608,9 @@ async function addStudent(){
   let id = baseId, n = 1;
   while(roster.some(s=>s.id===id)){ id = baseId + n; n++; }
   const code = String(Math.floor(1000 + Math.random()*9000));
-  roster.push({ id, name, code });
-  await saveRoster(roster);
+  try{
+    await db.collection('students').doc(id).set({ name, code });
+  }catch(e){ console.error('add student failed', e); alert('Не удалось добавить ученика. Проверьте подключение к Firebase.'); return; }
   nameInput.value = '';
   document.getElementById('credentialBox').classList.add('show');
   document.getElementById('newLoginOut').textContent = id;
@@ -602,9 +619,10 @@ async function addStudent(){
 }
 
 async function deleteStudent(id){
-  roster = await loadRoster();
-  roster = roster.filter(s=>s.id!==id);
-  await saveRoster(roster);
+  try{
+    await db.collection('students').doc(id).delete();
+    await db.collection('progress').doc(id).delete();
+  }catch(e){ console.error('delete student failed', e); }
   await renderAdmin();
 }
 
