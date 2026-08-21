@@ -194,6 +194,35 @@
   .admin-view{ display:none; }
   .admin-view.active{ display:block; }
 
+  /* ---------- HOMEWORK ---------- */
+  .hw-banner{
+    display:none; margin:16px 20px 0; max-width:900px; margin-left:auto; margin-right:auto;
+    background:linear-gradient(135deg, rgba(201,162,75,0.14), rgba(63,191,173,0.1));
+    border:1px solid var(--gold); border-radius:12px; padding:14px 18px;
+    align-items:flex-start; gap:12px;
+  }
+  .hw-banner.show{ display:flex; }
+  .hw-banner-icon{ font-size:20px; line-height:1; }
+  .hw-banner-body{ flex:1; }
+  .hw-banner-title{ font-size:12.5px; color:var(--gold-soft); font-weight:700; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:3px; }
+  .hw-banner-text{ font-size:14px; line-height:1.4; }
+  .hw-banner-done-btn{
+    background:var(--panel-light); border:1px solid var(--panel-border); color:var(--text);
+    border-radius:8px; padding:7px 13px; font-size:12.5px; cursor:pointer; font-family:inherit; white-space:nowrap;
+  }
+  .hw-banner-done-btn:hover{ border-color:var(--teal); color:var(--teal); }
+  .hw-edit-row{ display:flex; gap:8px; margin-top:8px; }
+  .hw-edit-row input{
+    flex:1; background:var(--panel); border:1px solid var(--panel-border); border-radius:7px;
+    padding:8px 10px; color:var(--text); font-size:13px; font-family:inherit;
+  }
+  .hw-save-btn{
+    background:var(--teal); border:none; color:#0C2A26; border-radius:7px; padding:8px 14px;
+    font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap;
+  }
+  .lesson-hw-text{ margin-top:6px; font-size:12.5px; color:var(--gold-soft); display:flex; align-items:center; gap:6px; }
+  .hw-check{ width:14px; height:14px; }
+
   /* ---------- APP SHELL ---------- */
   #appScreen{ display:none; min-height:100vh; flex-direction:column; }
   header.topbar{
@@ -480,6 +509,15 @@
       </div>
     </header>
 
+    <div class="hw-banner" id="hwBanner">
+      <div class="hw-banner-icon">📘</div>
+      <div class="hw-banner-body">
+        <div class="hw-banner-title">Домашнее задание</div>
+        <div class="hw-banner-text" id="hwBannerText"></div>
+      </div>
+      <button class="hw-banner-done-btn" id="hwBannerDoneBtn">Отметить выполненным</button>
+    </div>
+
     <nav class="tabs">
       <button class="tab-btn active" data-tab="alphabet">Алфавит</button>
       <button class="tab-btn" data-tab="flashcards">Карточки</button>
@@ -639,10 +677,10 @@ let quizAnswered = false;
 async function loadProgress(id){
   try{
     const doc = await db.collection('progress').doc(id).get();
-    return doc.exists ? doc.data() : { seenLetters:[], quizHistory:[] };
+    return doc.exists ? Object.assign({ seenLetters:[], quizHistory:[], homeworkDone:{} }, doc.data()) : { seenLetters:[], quizHistory:[], homeworkDone:{} };
   }catch(e){
     console.error('load progress failed', e);
-    return { seenLetters:[], quizHistory:[] };
+    return { seenLetters:[], quizHistory:[], homeworkDone:{} };
   }
 }
 async function saveProgress(id, data){
@@ -706,6 +744,7 @@ async function doLogin(){
   initFlashcards();
   initQuiz();
   renderProgress();
+  renderHomeworkBanner();
 }
 
 document.getElementById('logoutBtn').addEventListener('click', ()=>{
@@ -1049,16 +1088,34 @@ function showAdminDay(dateStr){
     return;
   }
   list.innerHTML = lessons.map(l => `
-    <div class="lesson-item">
-      <div class="lesson-item-info">
-        <strong>${l.time}</strong><span class="lesson-item-students">${studentNamesFor(l.studentIds, roster)} · ${l.duration} мин</span>
-        ${l.note ? `<div class="lesson-item-note">${l.note}</div>` : ''}
+    <div class="lesson-item" style="flex-direction:column; align-items:stretch;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="lesson-item-info">
+          <strong>${l.time}</strong><span class="lesson-item-students">${studentNamesFor(l.studentIds, roster)} · ${l.duration} мин</span>
+          ${l.note ? `<div class="lesson-item-note">${l.note}</div>` : ''}
+        </div>
+        <div class="lesson-actions">
+          <button class="lesson-del-btn" data-id="${l.id}" data-mode="one">Удалить</button>
+          ${l.seriesId ? `<button class="lesson-del-btn" data-series="${l.seriesId}" data-date="${l.date}" data-mode="series">Всю серию</button>` : ''}
+        </div>
       </div>
-      <div class="lesson-actions">
-        <button class="lesson-del-btn" data-id="${l.id}" data-mode="one">Удалить</button>
-        ${l.seriesId ? `<button class="lesson-del-btn" data-series="${l.seriesId}" data-date="${l.date}" data-mode="series">Всю серию</button>` : ''}
+      <div class="hw-edit-row">
+        <input type="text" placeholder="Домашнее задание для этого занятия" value="${(l.homework||'').replace(/"/g,'&quot;')}" data-hw-id="${l.id}">
+        <button class="hw-save-btn" data-hw-save="${l.id}">Сохранить</button>
       </div>
     </div>`).join('');
+  list.querySelectorAll('[data-hw-save]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.dataset.hwSave;
+      const input = list.querySelector(`[data-hw-id="${id}"]`);
+      try{
+        await db.collection('lessons').doc(id).update({ homework: input.value.trim() });
+        btn.textContent = 'Сохранено ✓';
+        setTimeout(()=>{ btn.textContent = 'Сохранить'; }, 1500);
+        admLessonsCache = await loadLessons();
+      }catch(e){ console.error(e); }
+    });
+  });
   list.querySelectorAll('[data-mode="one"]').forEach(btn=>{
     btn.addEventListener('click', async ()=>{ await db.collection('lessons').doc(btn.dataset.id).delete(); await renderAdminCalendar(); });
   });
@@ -1142,12 +1199,25 @@ function showStudentDay(dateStr){
     return;
   }
   list.innerHTML = lessons.map(l => `
-    <div class="lesson-item">
+    <div class="lesson-item" style="flex-direction:column; align-items:stretch;">
       <div class="lesson-item-info">
         <strong>${l.time}</strong><span class="lesson-item-students">${l.duration} мин${l.studentIds.length>1 ? ' · групповое' : ''}</span>
         ${l.note ? `<div class="lesson-item-note">${l.note}</div>` : ''}
       </div>
+      ${l.homework ? `
+        <label class="lesson-hw-text">
+          <input type="checkbox" class="hw-check" data-hw-lesson="${l.id}" ${progress.homeworkDone && progress.homeworkDone[l.id] ? 'checked' : ''}>
+          📘 ${l.homework}
+        </label>` : ''}
     </div>`).join('');
+  list.querySelectorAll('[data-hw-lesson]').forEach(cb=>{
+    cb.addEventListener('change', async ()=>{
+      progress.homeworkDone = progress.homeworkDone || {};
+      progress.homeworkDone[cb.dataset.hwLesson] = cb.checked;
+      await saveProgress(studentId, progress);
+      await renderHomeworkBanner();
+    });
+  });
 }
 document.getElementById('stuCalPrev').addEventListener('click', ()=>{
   stuCalMonth--; if(stuCalMonth<0){ stuCalMonth=11; stuCalYear--; } stuSelectedDate=null;
@@ -1157,6 +1227,29 @@ document.getElementById('stuCalNext').addEventListener('click', ()=>{
   stuCalMonth++; if(stuCalMonth>11){ stuCalMonth=0; stuCalYear++; } stuSelectedDate=null;
   document.getElementById('stuDayPanel').style.display='none'; renderStudentCalendar();
 });
+
+/* ---- HOMEWORK BANNER ---- */
+async function renderHomeworkBanner(){
+  const banner = document.getElementById('hwBanner');
+  const all = await loadLessons();
+  const mine = all.filter(l => l.studentIds.includes(studentId) && l.homework && l.homework.trim());
+  progress.homeworkDone = progress.homeworkDone || {};
+  const pending = mine.filter(l => !progress.homeworkDone[l.id]);
+  if(!pending.length){ banner.classList.remove('show'); return; }
+  // show the most recent assigned (closest date to today, past or today first, else nearest upcoming)
+  const today = todayStr();
+  pending.sort((a,b)=> a.date.localeCompare(b.date));
+  let chosen = pending.filter(l=>l.date<=today).slice(-1)[0] || pending[0];
+  const d = new Date(chosen.date+'T00:00:00');
+  const dateLabel = d.toLocaleDateString('ru-RU', {day:'numeric', month:'long'});
+  document.getElementById('hwBannerText').textContent = `К занятию ${dateLabel}: ${chosen.homework}`;
+  document.getElementById('hwBannerDoneBtn').onclick = async ()=>{
+    progress.homeworkDone[chosen.id] = true;
+    await saveProgress(studentId, progress);
+    await renderHomeworkBanner();
+  };
+  banner.classList.add('show');
+}
 </script>
 </body>
 </html>
