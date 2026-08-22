@@ -20,6 +20,7 @@
     --rose: #C1614A;
     --forest: #1E3A2B;
     --forest-light: #2A4A38;
+    --arabic-dark: #2C4A32;
     --cream-text: #F3ECD9;
     --cream-muted: #B9C4AC;
     --radius: 14px;
@@ -282,6 +283,26 @@
   .content-note-title{ font-size:15.5px; font-weight:700; margin-bottom:8px; color:var(--teal); }
   .content-note-body{ font-size:14px; line-height:1.6; white-space:pre-wrap; }
 
+  /* ---------- LESSON/GRAMMAR CARD GRID ---------- */
+  .lesson-card-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:14px; }
+  .lesson-card{
+    background:var(--panel); border:1px solid var(--panel-border); border-radius:14px;
+    padding:20px; cursor:pointer; transition:all 0.18s; text-align:left; position:relative;
+  }
+  .lesson-card:hover{ border-color:var(--gold); transform:translateY(-2px); }
+  .lesson-card-num{ font-size:11px; color:var(--teal); font-weight:700; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:8px; }
+  .lesson-card-title{ font-size:15px; font-weight:700; line-height:1.35; }
+  .lesson-card-icon{ font-size:22px; margin-bottom:10px; }
+  .back-btn{
+    background:none; border:1px solid var(--panel-border); color:var(--muted);
+    border-radius:8px; padding:8px 14px; font-size:13px; cursor:pointer; font-family:inherit; margin-bottom:6px;
+  }
+  .back-btn:hover{ border-color:var(--gold); color:var(--text); }
+  .task-link-btn{
+    display:inline-block; margin-top:10px; background:var(--forest); color:var(--cream-text);
+    border-radius:8px; padding:8px 14px; font-size:12.5px; font-weight:700; text-decoration:none;
+  }
+
   /* ---------- MATERIALS MANAGEMENT ---------- */
   .mat-form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
   .mat-form-grid .field{ margin-bottom:0; }
@@ -293,7 +314,7 @@
   .mat-list-item-body{ flex:1; min-width:0; }
   .mat-list-cat{ font-size:11px; color:var(--teal); font-weight:700; text-transform:uppercase; letter-spacing:0.3px; margin-bottom:2px; }
   .mat-list-main{ display:flex; gap:8px; align-items:baseline; flex-wrap:wrap; }
-  .mat-list-ar{ font-family:'Amiri', serif; font-size:18px; color:var(--gold-soft); }
+  .mat-list-ar{ font-family:'Amiri', serif; font-size:18px; color:var(--arabic-dark); }
   .mat-list-sub{ color:var(--muted); font-size:12px; }
   .mat-q-options{ margin-top:4px; font-size:12px; color:var(--muted); }
   .mat-q-correct{ color:var(--teal); font-weight:700; }
@@ -316,7 +337,7 @@
   .topbar-greeting{ font-size:17px; font-weight:800; }
   .topbar-greeting-sub{ font-size:12.5px; color:var(--muted); margin-top:2px; font-weight:500; }
   .brand{ display:flex; align-items:center; gap:10px; }
-  .brand-word{ font-family:'Amiri', serif; font-size:24px; color:var(--gold-soft); }
+  .brand-word{ font-family:'Amiri', serif; font-size:24px; color:var(--arabic-dark); }
   .brand-name{ font-size:13px; color:var(--muted); }
   .student-chip{
     display:flex; align-items:center; gap:10px; font-size:13.5px; color:var(--muted);
@@ -378,7 +399,7 @@
   .letter-card.seen::after{
     content:'✓'; position:absolute; top:6px; right:8px; color:var(--teal); font-size:12px; font-weight:700;
   }
-  .letter-ar{ font-family:'Amiri', serif; font-size:40px; color:var(--gold-soft); }
+  .letter-ar{ font-family:'Amiri', serif; font-size:40px; color:var(--arabic-dark); }
   .letter-translit{ font-size:12px; color:var(--muted); margin-top:6px; }
   .letter-name{ font-size:11px; color:var(--muted); opacity:0.8; }
 
@@ -404,7 +425,7 @@
     border:1px solid var(--panel-border); background:var(--panel); padding:20px;
   }
   .flashcard-face.back{ transform:rotateY(180deg); background:var(--panel-light); }
-  .flash-ar{ font-family:'Amiri', serif; font-size:46px; color:var(--gold-soft); }
+  .flash-ar{ font-family:'Amiri', serif; font-size:46px; color:var(--arabic-dark); }
   .flash-translit{ color:var(--muted); font-size:14px; }
   .flash-ru{ font-size:20px; font-weight:700; }
   .flash-tap-hint{ position:absolute; bottom:12px; font-size:11px; color:var(--muted); opacity:0.6; }
@@ -419,7 +440,7 @@
   .quiz-progress-bar{ height:6px; background:var(--panel); border-radius:6px; overflow:hidden; margin-bottom:22px; }
   .quiz-progress-fill{ height:100%; background:linear-gradient(90deg,var(--teal),var(--gold)); transition:width 0.3s; }
   .quiz-question{ background:var(--panel); border:1px solid var(--panel-border); border-radius:14px; padding:24px; }
-  .q-arabic{ font-family:'Amiri', serif; font-size:30px; color:var(--gold-soft); margin-bottom:6px; }
+  .q-arabic{ font-family:'Amiri', serif; font-size:30px; color:var(--arabic-dark); margin-bottom:6px; }
   .q-text{ font-size:16px; margin-bottom:18px; }
   .q-options{ display:flex; flex-direction:column; gap:10px; }
   .q-option{
@@ -516,6 +537,7 @@
         <button class="admin-subnav-btn" id="adminNavSchedule">Расписание</button>
         <button class="admin-subnav-btn" id="adminNavMaterials">Карточки и квиз</button>
         <button class="admin-subnav-btn" id="adminNavContent">Уроки и грамматика</button>
+        <button class="admin-subnav-btn" id="adminNavTasks">Задания</button>
       </div>
 
       <div class="admin-view active" id="adminViewStudents">
@@ -656,6 +678,36 @@
           <div style="margin-top:18px;" id="grammarNotesList"></div>
         </div>
       </div>
+
+      <div class="admin-view" id="adminViewTasks">
+        <div class="admin-card">
+          <div class="admin-card-title">🎧 Аудирование</div>
+          <div class="field"><label>Заголовок</label><input type="text" id="newListenTitle" placeholder="Например, Диалог в кафе"></div>
+          <div class="field"><label>Описание задания</label><textarea id="newListenBody" rows="3" style="width:100%; background:var(--panel-light); border:1px solid var(--panel-border); border-radius:9px; padding:11px 13px; color:var(--text); font-size:14px; font-family:inherit; resize:vertical;" placeholder="Что нужно сделать ученику"></textarea></div>
+          <div class="field"><label>Ссылка на аудио (необязательно)</label><input type="text" id="newListenLink" placeholder="https://..."></div>
+          <button class="btn-primary" id="addListenBtn" style="max-width:200px;">Добавить задание</button>
+          <div class="login-error" id="listenError"></div>
+          <div style="margin-top:18px;" id="listenTasksList"></div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">📖 Чтение</div>
+          <div class="field"><label>Заголовок</label><input type="text" id="newReadTitle" placeholder="Например, Текст о Каире"></div>
+          <div class="field"><label>Текст / описание задания</label><textarea id="newReadBody" rows="3" style="width:100%; background:var(--panel-light); border:1px solid var(--panel-border); border-radius:9px; padding:11px 13px; color:var(--text); font-size:14px; font-family:inherit; resize:vertical;" placeholder="Текст для чтения или инструкция"></textarea></div>
+          <div class="field"><label>Ссылка (необязательно)</label><input type="text" id="newReadLink" placeholder="https://..."></div>
+          <button class="btn-primary" id="addReadBtn" style="max-width:200px;">Добавить задание</button>
+          <div class="login-error" id="readError"></div>
+          <div style="margin-top:18px;" id="readTasksList"></div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">✍️ Письмо</div>
+          <div class="field"><label>Заголовок</label><input type="text" id="newWriteTitle" placeholder="Например, Напишите о своей семье"></div>
+          <div class="field"><label>Описание задания</label><textarea id="newWriteBody" rows="3" style="width:100%; background:var(--panel-light); border:1px solid var(--panel-border); border-radius:9px; padding:11px 13px; color:var(--text); font-size:14px; font-family:inherit; resize:vertical;" placeholder="Что нужно написать ученику"></textarea></div>
+          <div class="field"><label>Ссылка (необязательно)</label><input type="text" id="newWriteLink" placeholder="https://..."></div>
+          <button class="btn-primary" id="addWriteBtn" style="max-width:200px;">Добавить задание</button>
+          <div class="login-error" id="writeError"></div>
+          <div style="margin-top:18px;" id="writeTasksList"></div>
+        </div>
+      </div>
     </main>
   </div>
 
@@ -668,7 +720,6 @@
       </div>
       <nav class="sidebar-nav">
         <button class="sidebar-tab-btn active" data-tab="home"><span class="tab-icon">🏠</span>Главная</button>
-        <button class="sidebar-tab-btn" data-tab="alphabet"><span class="tab-icon">🔤</span>Алфавит</button>
         <button class="sidebar-tab-btn" data-tab="flashcards"><span class="tab-icon">🗂️</span>Словарь</button>
         <button class="sidebar-tab-btn" data-tab="quiz"><span class="tab-icon">📝</span>Квиз</button>
         <button class="sidebar-tab-btn" data-tab="practice"><span class="tab-icon">🎯</span>Практика</button>
@@ -748,7 +799,7 @@
           </div>
           <div class="home-card">
             <div class="home-card-title">Цель дня</div>
-            <div class="home-goal-label" id="homeGoalLabel">Изучите 10 новых слов или букв сегодня</div>
+            <div class="home-goal-label" id="homeGoalLabel">Изучите 10 новых слов сегодня</div>
             <div class="home-goal-track"><div class="home-goal-fill" id="homeGoalFill" style="width:0%"></div></div>
             <div class="home-goal-label" id="homeGoalCount">0 / 10</div>
           </div>
@@ -764,12 +815,6 @@
       </section>
 
       <!-- ALPHABET -->
-      <section class="section" id="section-alphabet">
-        <div class="section-title">Арабский алфавит</div>
-        <div class="section-desc">Нажмите на букву, чтобы услышать произношение и отметить как изученную.</div>
-        <div class="letter-grid" id="letterGrid"></div>
-      </section>
-
       <!-- FLASHCARDS -->
       <section class="section" id="section-flashcards">
         <div class="section-title">Словарь</div>
@@ -809,22 +854,68 @@
       <!-- PRACTICE HUB -->
       <section class="section" id="section-practice">
         <div class="section-title">Практика</div>
-        <div class="section-desc">Быстрый доступ ко всем видам практики и ваш прогресс по каждому.</div>
+        <div class="section-desc">Быстрый доступ ко всем видам практики.</div>
         <div class="practice-tiles" id="practicePageTiles"></div>
       </section>
 
       <!-- LESSONS -->
       <section class="section" id="section-lessons">
-        <div class="section-title">Уроки</div>
-        <div class="section-desc">Тексты и материалы, которые добавляет преподаватель.</div>
-        <div id="lessonsList"></div>
+        <div id="lessonsListView">
+          <div class="section-title">Уроки</div>
+          <div class="section-desc">Нажмите на урок, чтобы открыть его.</div>
+          <div class="lesson-card-grid" id="lessonsCardGrid"></div>
+        </div>
+        <div id="lessonsDetailView" style="display:none;">
+          <button class="back-btn" id="lessonBackBtn">‹ Все уроки</button>
+          <div id="lessonDetailAlphabet" style="display:none;">
+            <div class="section-title" style="margin-top:14px;">Урок 1: Арабский алфавит</div>
+            <div class="section-desc">Нажмите на букву, чтобы услышать произношение и отметить как изученную.</div>
+            <div class="letter-grid" id="letterGrid"></div>
+          </div>
+          <div id="lessonDetailNote" style="display:none;">
+            <div class="content-note" style="margin-top:14px;">
+              <div class="content-note-title" id="lessonDetailTitle"></div>
+              <div class="content-note-body" id="lessonDetailBody"></div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- GRAMMAR -->
       <section class="section" id="section-grammar">
-        <div class="section-title">Грамматика</div>
-        <div class="section-desc">Объяснения грамматических тем от преподавателя.</div>
-        <div id="grammarList"></div>
+        <div id="grammarListView">
+          <div class="section-title">Грамматика</div>
+          <div class="section-desc">Нажмите на тему, чтобы открыть объяснение.</div>
+          <div class="lesson-card-grid" id="grammarCardGrid"></div>
+        </div>
+        <div id="grammarDetailView" style="display:none;">
+          <button class="back-btn" id="grammarBackBtn">‹ Все темы</button>
+          <div class="content-note" style="margin-top:14px;">
+            <div class="content-note-title" id="grammarDetailTitle"></div>
+            <div class="content-note-body" id="grammarDetailBody"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LISTENING -->
+      <section class="section" id="section-listening">
+        <div class="section-title">Аудирование</div>
+        <div class="section-desc">Задания на аудирование от преподавателя.</div>
+        <div id="listeningList"></div>
+      </section>
+
+      <!-- READING -->
+      <section class="section" id="section-reading">
+        <div class="section-title">Чтение</div>
+        <div class="section-desc">Тексты и задания на чтение от преподавателя.</div>
+        <div id="readingList"></div>
+      </section>
+
+      <!-- WRITING -->
+      <section class="section" id="section-writing">
+        <div class="section-title">Письмо</div>
+        <div class="section-desc">Задания на письмо от преподавателя.</div>
+        <div id="writingList"></div>
       </section>
 
       <!-- PROGRESS -->
@@ -927,6 +1018,7 @@ const SEED_QUIZ = [
 let studentId = null;
 let studentName = null;
 let currentCat = null;
+let currentFlashCardId = null;
 let flashIndex = 0;
 let quizIndex = 0;
 let quizScore = 0;
@@ -963,11 +1055,11 @@ async function loadQuizzesData(){
 async function loadProgress(id){
   try{
     const doc = await db.collection('progress').doc(id).get();
-    const base = { seenLetters:[], quizHistory:[], homeworkDone:{}, dailyGoal:{date:'',count:0}, lastCategory:null };
+    const base = { seenLetters:[], quizHistory:[], homeworkDone:{}, dailyGoal:{date:'',count:0}, lastCategory:null, seenCards:{}, lastLesson:null };
     return doc.exists ? Object.assign(base, doc.data()) : base;
   }catch(e){
     console.error('load progress failed', e);
-    return { seenLetters:[], quizHistory:[], homeworkDone:{}, dailyGoal:{date:'',count:0}, lastCategory:null };
+    return { seenLetters:[], quizHistory:[], homeworkDone:{}, dailyGoal:{date:'',count:0}, lastCategory:null, seenCards:{}, lastLesson:null };
   }
 }
 async function saveProgress(id, data){
@@ -1062,7 +1154,7 @@ document.getElementById('adminLogoutBtn').addEventListener('click', ()=>{
 });
 
 document.getElementById('adminNavStudents').addEventListener('click', ()=>{
-  ['Students','Schedule','Materials','Content'].forEach(k=>{
+  ['Students','Schedule','Materials','Content','Tasks'].forEach(k=>{
     document.getElementById('adminNav'+k).classList.remove('active');
     document.getElementById('adminView'+k).classList.remove('active');
   });
@@ -1070,7 +1162,7 @@ document.getElementById('adminNavStudents').addEventListener('click', ()=>{
   document.getElementById('adminViewStudents').classList.add('active');
 });
 document.getElementById('adminNavSchedule').addEventListener('click', async ()=>{
-  ['Students','Schedule','Materials','Content'].forEach(k=>{
+  ['Students','Schedule','Materials','Content','Tasks'].forEach(k=>{
     document.getElementById('adminNav'+k).classList.remove('active');
     document.getElementById('adminView'+k).classList.remove('active');
   });
@@ -1079,7 +1171,7 @@ document.getElementById('adminNavSchedule').addEventListener('click', async ()=>
   await initAdminSchedule();
 });
 document.getElementById('adminNavMaterials').addEventListener('click', async ()=>{
-  ['Students','Schedule','Materials','Content'].forEach(k=>{
+  ['Students','Schedule','Materials','Content','Tasks'].forEach(k=>{
     document.getElementById('adminNav'+k).classList.remove('active');
     document.getElementById('adminView'+k).classList.remove('active');
   });
@@ -1088,7 +1180,7 @@ document.getElementById('adminNavMaterials').addEventListener('click', async ()=
   await renderMaterialsAdmin();
 });
 document.getElementById('adminNavContent').addEventListener('click', async ()=>{
-  ['Students','Schedule','Materials','Content'].forEach(k=>{
+  ['Students','Schedule','Materials','Content','Tasks'].forEach(k=>{
     document.getElementById('adminNav'+k).classList.remove('active');
     document.getElementById('adminView'+k).classList.remove('active');
   });
@@ -1096,6 +1188,16 @@ document.getElementById('adminNavContent').addEventListener('click', async ()=>{
   document.getElementById('adminViewContent').classList.add('active');
   await renderContentAdmin();
 });
+document.getElementById('adminNavTasks').addEventListener('click', async ()=>{
+  ['Students','Schedule','Materials','Content','Tasks'].forEach(k=>{
+    document.getElementById('adminNav'+k).classList.remove('active');
+    document.getElementById('adminView'+k).classList.remove('active');
+  });
+  document.getElementById('adminNavTasks').classList.add('active');
+  document.getElementById('adminViewTasks').classList.add('active');
+  await renderTasksAdmin();
+});
+
 
 /* ================= ADMIN: ADD / DELETE STUDENTS ================= */
 document.getElementById('addStudentBtn').addEventListener('click', addStudent);
@@ -1159,19 +1261,24 @@ async function renderAdmin(){
 }
 
 /* ================= TABS ================= */
+function activateTab(tabName){
+  document.querySelectorAll('.sidebar-tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  const btn = document.querySelector(`.sidebar-tab-btn[data-tab="${tabName}"]`);
+  if(btn) btn.classList.add('active');
+  document.getElementById('section-'+tabName).classList.add('active');
+  if(tabName === 'progress') renderProgress();
+  if(tabName === 'schedule') initStudentSchedule();
+  if(tabName === 'home') renderHome();
+  if(tabName === 'practice') renderPracticeHub();
+  if(tabName === 'lessons') renderLessonsList();
+  if(tabName === 'grammar') renderGrammarList();
+  if(tabName === 'listening') renderListeningList();
+  if(tabName === 'reading') renderReadingList();
+  if(tabName === 'writing') renderWritingList();
+}
 document.querySelectorAll('.sidebar-tab-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.sidebar-tab-btn').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('section-'+btn.dataset.tab).classList.add('active');
-    if(btn.dataset.tab === 'progress') renderProgress();
-    if(btn.dataset.tab === 'schedule') initStudentSchedule();
-    if(btn.dataset.tab === 'home') renderHome();
-    if(btn.dataset.tab === 'practice') renderPracticeHub();
-    if(btn.dataset.tab === 'lessons') renderLessonsList();
-    if(btn.dataset.tab === 'grammar') renderGrammarList();
-  });
+  btn.addEventListener('click', ()=> activateTab(btn.dataset.tab));
 });
 
 /* ================= ALPHABET ================= */
@@ -1193,7 +1300,6 @@ function initAlphabet(){
       speak(ar);
       if(!progress.seenLetters.includes(ar)){
         progress.seenLetters.push(ar);
-        bumpDailyGoal(1);
         saveProgress(studentId, progress);
         card.classList.add('seen');
       }
@@ -1237,6 +1343,7 @@ function renderFlashcard(){
   const cards = flashcardsData[currentCat];
   if(!cards || !cards.length) return;
   const c = cards[flashIndex];
+  currentFlashCardId = c.id;
   document.getElementById('flashAr').textContent = c.ar;
   document.getElementById('flashTranslit').textContent = c.translit;
   document.getElementById('flashRu').textContent = c.ru;
@@ -1245,6 +1352,14 @@ function renderFlashcard(){
 }
 document.getElementById('flashcard').addEventListener('click', function(){
   this.classList.toggle('flipped');
+  if(this.classList.contains('flipped') && currentFlashCardId){
+    progress.seenCards = progress.seenCards || {};
+    if(!progress.seenCards[currentFlashCardId]){
+      progress.seenCards[currentFlashCardId] = true;
+      bumpDailyGoal(1);
+      saveProgress(studentId, progress);
+    }
+  }
 });
 document.getElementById('flashPrev').addEventListener('click', e=>{
   e.stopPropagation();
@@ -1310,7 +1425,6 @@ function renderQuiz(){
       </div>`;
     document.getElementById('quizRestart').addEventListener('click', startQuiz);
     progress.quizHistory.push({date:new Date().toISOString(), score:quizScore, total:quizData.length, quizName:currentQuizName});
-    bumpDailyGoal(5);
     saveProgress(studentId, progress);
     return;
   }
@@ -1731,8 +1845,7 @@ document.getElementById('seedQuizBtn').addEventListener('click', async ()=>{
 
 /* ================= NAVIGATION HELPER ================= */
 function goToTab(name){
-  const btn = document.querySelector(`.sidebar-tab-btn[data-tab="${name}"]`);
-  if(btn) btn.click();
+  activateTab(name);
 }
 
 /* ================= DAILY GOAL ================= */
@@ -1766,10 +1879,12 @@ async function renderHome(){
   // continue learning
   const continueRow = document.getElementById('homeContinueRow');
   const items = [];
-  if(progress.lastCategory && flashcardsData[progress.lastCategory]){
+  if(progress.lastLesson){
     items.push({
-      title: 'Словарь: '+progress.lastCategory, sub: flashcardsData[progress.lastCategory].length+' карточек в теме',
-      action: ()=>{ currentCat = progress.lastCategory; goToTab('flashcards'); }, label:'Продолжить'
+      title: 'Урок: '+progress.lastLesson.title, sub: 'Продолжить с того же места',
+      action: ()=>{ goToTab('lessons'); setTimeout(()=>{
+        if(progress.lastLesson.id === '__alphabet'){ openLessonDetail({id:'__alphabet', title:'Алфавит', isAlphabet:true}); }
+      }, 50); }, label:'Продолжить'
     });
   }
   if(progress.quizHistory.length){
@@ -1780,7 +1895,7 @@ async function renderHome(){
     });
   }
   if(!items.length){
-    continueRow.innerHTML = `<div class="empty-state" style="padding:10px 0;">Вы ещё не начинали заниматься — откройте раздел «Алфавит», чтобы стартовать.</div>`;
+    continueRow.innerHTML = `<div class="empty-state" style="padding:10px 0;">Вы ещё не начинали заниматься — откройте раздел «Уроки», чтобы стартовать.</div>`;
   } else {
     continueRow.innerHTML = items.map((it,i)=>`
       <div class="home-continue-item">
@@ -1799,12 +1914,11 @@ function buildPracticeTiles(containerId){
   const el = document.getElementById(containerId);
   if(!el) return;
   const catCount = Object.keys(flashcardsData).length;
-  const quizCount = Object.keys(quizzesData).length;
   const tiles = [
-    { icon:'🔤', title:'Алфавит', sub:`${progress.seenLetters.length}/28 букв`, tab:'alphabet' },
     { icon:'🗂️', title:'Словарь', sub:`${catCount} тем`, tab:'flashcards' },
-    { icon:'📝', title:'Квиз', sub:`${quizCount} квизов`, tab:'quiz' },
-    { icon:'📅', title:'Расписание', sub:'Ваши занятия', tab:'schedule' }
+    { icon:'🎧', title:'Аудирование', sub:'Задания на слух', tab:'listening' },
+    { icon:'📖', title:'Чтение', sub:'Тексты и задания', tab:'reading' },
+    { icon:'✍️', title:'Письмо', sub:'Письменные задания', tab:'writing' }
   ];
   el.innerHTML = tiles.map((t,i)=>`
     <button class="practice-tile" data-tile-i="${i}">
@@ -1835,31 +1949,91 @@ async function loadGrammarNotes(){
 }
 async function renderLessonsList(){
   const list = await loadLessonNotes();
-  const el = document.getElementById('lessonsList');
-  if(!list.length){ el.innerHTML = '<div class="empty-state">Пока нет уроков — преподаватель ещё не добавил материалы.</div>'; return; }
-  el.innerHTML = list.map(l => `
-    <div class="content-note">
-      <div class="content-note-title">${l.title}</div>
-      <div class="content-note-body">${(l.body||'').replace(/</g,'&lt;')}</div>
+  const grid = document.getElementById('lessonsCardGrid');
+  document.getElementById('lessonsListView').style.display = 'block';
+  document.getElementById('lessonsDetailView').style.display = 'none';
+  const cards = [{ id:'__alphabet', title:'Алфавит', isAlphabet:true }].concat(list);
+  grid.innerHTML = cards.map((l,i) => `
+    <div class="lesson-card" data-lesson-i="${i}">
+      <div class="lesson-card-icon">${l.isAlphabet ? '🔤' : '📖'}</div>
+      <div class="lesson-card-num">Урок ${i+1}</div>
+      <div class="lesson-card-title">${l.title}</div>
     </div>`).join('');
+  grid.querySelectorAll('[data-lesson-i]').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      const l = cards[parseInt(card.dataset.lessonI)];
+      openLessonDetail(l);
+    });
+  });
 }
+function openLessonDetail(l){
+  document.getElementById('lessonsListView').style.display = 'none';
+  document.getElementById('lessonsDetailView').style.display = 'block';
+  if(l.isAlphabet){
+    document.getElementById('lessonDetailAlphabet').style.display = 'block';
+    document.getElementById('lessonDetailNote').style.display = 'none';
+    initAlphabet();
+  } else {
+    document.getElementById('lessonDetailAlphabet').style.display = 'none';
+    document.getElementById('lessonDetailNote').style.display = 'block';
+    document.getElementById('lessonDetailTitle').textContent = l.title;
+    document.getElementById('lessonDetailBody').textContent = l.body || '';
+  }
+  progress.lastLesson = { id: l.id, title: l.isAlphabet ? 'Алфавит' : l.title };
+  saveProgress(studentId, progress);
+}
+document.getElementById('lessonBackBtn').addEventListener('click', renderLessonsList);
+
 async function renderGrammarList(){
   const list = await loadGrammarNotes();
-  const el = document.getElementById('grammarList');
-  if(!list.length){ el.innerHTML = '<div class="empty-state">Пока нет тем — преподаватель ещё не добавил объяснения.</div>'; return; }
-  el.innerHTML = list.map(g => `
+  const grid = document.getElementById('grammarCardGrid');
+  document.getElementById('grammarListView').style.display = 'block';
+  document.getElementById('grammarDetailView').style.display = 'none';
+  if(!list.length){ grid.innerHTML = '<div class="empty-state">Пока нет тем — преподаватель ещё не добавил объяснения.</div>'; return; }
+  grid.innerHTML = list.map((g,i) => `
+    <div class="lesson-card" data-grammar-i="${i}">
+      <div class="lesson-card-icon">📐</div>
+      <div class="lesson-card-title">${g.title}</div>
+    </div>`).join('');
+  grid.querySelectorAll('[data-grammar-i]').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      const g = list[parseInt(card.dataset.grammarI)];
+      document.getElementById('grammarListView').style.display = 'none';
+      document.getElementById('grammarDetailView').style.display = 'block';
+      document.getElementById('grammarDetailTitle').textContent = g.title;
+      document.getElementById('grammarDetailBody').textContent = g.body || '';
+    });
+  });
+}
+document.getElementById('grammarBackBtn').addEventListener('click', renderGrammarList);
+
+/* ---- LISTENING / READING / WRITING (student, read-only) ---- */
+async function loadTasks(collection){
+  try{
+    const snap = await db.collection(collection).get();
+    return snap.docs.map(d=>({ id:d.id, ...d.data() }));
+  }catch(e){ console.error('load tasks failed', e); return []; }
+}
+function renderTaskListInto(elId, list, emptyMsg){
+  const el = document.getElementById(elId);
+  if(!list.length){ el.innerHTML = `<div class="empty-state">${emptyMsg}</div>`; return; }
+  el.innerHTML = list.map(t => `
     <div class="content-note">
-      <div class="content-note-title">${g.title}</div>
-      <div class="content-note-body">${(g.body||'').replace(/</g,'&lt;')}</div>
+      <div class="content-note-title">${t.title}</div>
+      <div class="content-note-body">${(t.body||'').replace(/</g,'&lt;')}</div>
+      ${t.link ? `<a class="task-link-btn" href="${t.link}" target="_blank" rel="noopener">Открыть материал ↗</a>` : ''}
     </div>`).join('');
 }
+async function renderListeningList(){ renderTaskListInto('listeningList', await loadTasks('listeningTasks'), 'Пока нет заданий на аудирование.'); }
+async function renderReadingList(){ renderTaskListInto('readingList', await loadTasks('readingTasks'), 'Пока нет заданий на чтение.'); }
+async function renderWritingList(){ renderTaskListInto('writingList', await loadTasks('writingTasks'), 'Пока нет заданий на письмо.'); }
 
 /* ---- ADMIN: content management ---- */
 async function renderContentAdmin(){
   const lessons = await loadLessonNotes();
   const grammar = await loadGrammarNotes();
   const lEl = document.getElementById('lessonNotesList');
-  lEl.innerHTML = !lessons.length ? '<div class="empty-state">Пока нет уроков.</div>' : lessons.map(l=>`
+  lEl.innerHTML = !lessons.length ? '<div class="empty-state">Пока нет дополнительных уроков (Урок 1 — Алфавит есть всегда).</div>' : lessons.map(l=>`
     <div class="mat-list-item">
       <div class="mat-list-item-body"><div class="mat-list-sub" style="font-weight:700; color:var(--text);">${l.title}</div></div>
       <button class="lesson-del-btn" data-del-lesson="${l.id}">Удалить</button>
@@ -1900,6 +2074,71 @@ document.getElementById('addGrammarNoteBtn').addEventListener('click', async ()=
   document.getElementById('newGrammarTitle').value = '';
   document.getElementById('newGrammarBody').value = '';
   await renderContentAdmin();
+});
+
+/* ---- ADMIN: tasks (listening/reading/writing) ---- */
+function taskAdminRow(t, collection, refreshFn){
+  return `
+    <div class="mat-list-item">
+      <div class="mat-list-item-body"><div class="mat-list-sub" style="font-weight:700; color:var(--text);">${t.title}</div></div>
+      <button class="lesson-del-btn" data-del-task="${t.id}" data-coll="${collection}">Удалить</button>
+    </div>`;
+}
+async function renderTasksAdmin(){
+  const listen = await loadTasks('listeningTasks');
+  const read = await loadTasks('readingTasks');
+  const write = await loadTasks('writingTasks');
+  document.getElementById('listenTasksList').innerHTML = !listen.length ? '<div class="empty-state">Пока нет заданий.</div>' : listen.map(t=>taskAdminRow(t,'listeningTasks')).join('');
+  document.getElementById('readTasksList').innerHTML = !read.length ? '<div class="empty-state">Пока нет заданий.</div>' : read.map(t=>taskAdminRow(t,'readingTasks')).join('');
+  document.getElementById('writeTasksList').innerHTML = !write.length ? '<div class="empty-state">Пока нет заданий.</div>' : write.map(t=>taskAdminRow(t,'writingTasks')).join('');
+  document.querySelectorAll('[data-del-task]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      await db.collection(btn.dataset.coll).doc(btn.dataset.delTask).delete();
+      await renderTasksAdmin();
+    });
+  });
+}
+document.getElementById('addListenBtn').addEventListener('click', async ()=>{
+  const errEl = document.getElementById('listenError');
+  const title = document.getElementById('newListenTitle').value.trim();
+  const body = document.getElementById('newListenBody').value.trim();
+  const link = document.getElementById('newListenLink').value.trim();
+  if(!title || !body){ errEl.textContent = 'Заполните заголовок и описание.'; return; }
+  errEl.textContent = '';
+  try{ await db.collection('listeningTasks').add({ title, body, link }); }
+  catch(e){ console.error(e); errEl.textContent = 'Не удалось сохранить.'; return; }
+  document.getElementById('newListenTitle').value = '';
+  document.getElementById('newListenBody').value = '';
+  document.getElementById('newListenLink').value = '';
+  await renderTasksAdmin();
+});
+document.getElementById('addReadBtn').addEventListener('click', async ()=>{
+  const errEl = document.getElementById('readError');
+  const title = document.getElementById('newReadTitle').value.trim();
+  const body = document.getElementById('newReadBody').value.trim();
+  const link = document.getElementById('newReadLink').value.trim();
+  if(!title || !body){ errEl.textContent = 'Заполните заголовок и текст.'; return; }
+  errEl.textContent = '';
+  try{ await db.collection('readingTasks').add({ title, body, link }); }
+  catch(e){ console.error(e); errEl.textContent = 'Не удалось сохранить.'; return; }
+  document.getElementById('newReadTitle').value = '';
+  document.getElementById('newReadBody').value = '';
+  document.getElementById('newReadLink').value = '';
+  await renderTasksAdmin();
+});
+document.getElementById('addWriteBtn').addEventListener('click', async ()=>{
+  const errEl = document.getElementById('writeError');
+  const title = document.getElementById('newWriteTitle').value.trim();
+  const body = document.getElementById('newWriteBody').value.trim();
+  const link = document.getElementById('newWriteLink').value.trim();
+  if(!title || !body){ errEl.textContent = 'Заполните заголовок и описание.'; return; }
+  errEl.textContent = '';
+  try{ await db.collection('writingTasks').add({ title, body, link }); }
+  catch(e){ console.error(e); errEl.textContent = 'Не удалось сохранить.'; return; }
+  document.getElementById('newWriteTitle').value = '';
+  document.getElementById('newWriteBody').value = '';
+  document.getElementById('newWriteLink').value = '';
+  await renderTasksAdmin();
 });
 </script>
 </body>
