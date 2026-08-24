@@ -6,7 +6,7 @@
 <title>مَدار — Платформа арабского</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script type="text/javascript" src="/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=8O0Wka1dv88SgkmGiuF87iv-bVa9l17YjYHt6-4w_VyzdF7Um024WWTmAigglFUL15_xD2IMHrMP08ZxolPndaNMceT9Q7bU3pmnxDfgBM4gjui5QitOe37SSZeYB1-TxUUXX279Ui2DOwspKbE4Dk9MOtnUVWSUTaBoTdA5RKWr1Hu7qgbrREPQmYuncxJHh6GcQRT47NcrMS7zQzzMeXMO-6Vkp5Yc0ltvMcjclZ9cVHRVvaNS9qANnGP-ye23SGoX8n3BW3Gwb5auXySTE_IW7_9TS1FAviHQkjQr2Q2yjQQPvGZhvYj0kTQCyysgWJLUrkccWZZCx5BUA100bw" charset="UTF-8"></script><style>
+<style>
   :root{
     --bg: #F5EFDE;
     --panel: #FFFFFF;
@@ -351,6 +351,13 @@
   .lesson-card-num{ font-size:11px; color:var(--teal); font-weight:700; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:8px; }
   .lesson-card-title{ font-size:15px; font-weight:700; line-height:1.35; }
   .lesson-card-icon{ font-size:22px; margin-bottom:10px; }
+  .dictionary-detail-view{ display:none; }
+  .dictionary-detail-head{ margin:14px 0 16px; }
+  .dictionary-detail-title{ font-size:24px; font-weight:800; color:var(--text); margin-bottom:4px; }
+  .dictionary-detail-count{ font-size:13px; color:var(--muted); }
+  .dictionary-flash-wrap{ display:flex; flex-direction:column; align-items:center; gap:16px; }
+  .dictionary-flash-wrap .flashcard{ width:min(100%, 520px); height:300px; }
+  .dictionary-flash-wrap .flash-controls{ justify-content:center; }
   .back-btn{
     background:none; border:1px solid var(--panel-border); color:var(--muted);
     border-radius:8px; padding:8px 14px; font-size:13px; cursor:pointer; font-family:inherit; margin-bottom:6px;
@@ -882,7 +889,6 @@
             <div class="hero-illustration-text">
               <div class="hero-illustration-ar">مَدار</div>
               <div class="hero-illustration-title">Платформа, которая помогает арабскому стать частью твоей жизни</div>
-              <div class="hero-illustration-sub">مَدار — авторская платформа для моих учеников: здесь можно проходить уроки, повторять пройденный материал, тренировать лексику и постепенно превращать знания в уверенную речь.</div>
             </div>
           </div>
 
@@ -926,27 +932,37 @@
       <!-- ALPHABET -->
       <!-- FLASHCARDS -->
       <section class="section" id="section-flashcards">
-        <div class="section-title">Словарь</div>
-        <div class="section-desc">Карточки для повторения слов и фраз по темам. Нажмите на карточку, чтобы увидеть перевод.</div>
-        <div class="category-row" id="catRow"></div>
-        <div class="flash-wrap">
-          <div class="flashcard" id="flashcard">
-            <div class="flashcard-inner">
-              <div class="flashcard-face front">
-                <div class="flash-ar arabic" id="flashAr"></div>
-                <div class="flash-translit" id="flashTranslit"></div>
-                <div class="flash-tap-hint">нажмите, чтобы перевернуть</div>
-              </div>
-              <div class="flashcard-face back">
-                <div class="flash-ru" id="flashRu"></div>
-                <div class="flash-tap-hint">нажмите ещё раз</div>
+        <div id="dictionaryListView">
+          <div class="section-title">Словарь</div>
+          <div class="section-desc">Выберите тему, чтобы открыть слова для повторения.</div>
+          <div class="lesson-card-grid" id="dictionaryCardGrid"></div>
+        </div>
+
+        <div id="dictionaryDetailView" class="dictionary-detail-view">
+          <button class="back-btn" id="dictionaryBackBtn">‹ Все темы</button>
+          <div class="dictionary-detail-head">
+            <div class="dictionary-detail-title" id="dictionaryDetailTitle"></div>
+            <div class="dictionary-detail-count" id="dictionaryDetailCount"></div>
+          </div>
+          <div class="dictionary-flash-wrap">
+            <div class="flashcard" id="flashcard">
+              <div class="flashcard-inner">
+                <div class="flashcard-face front">
+                  <div class="flash-ar arabic" id="flashAr"></div>
+                  <div class="flash-translit" id="flashTranslit"></div>
+                  <div class="flash-tap-hint">нажмите, чтобы перевернуть</div>
+                </div>
+                <div class="flashcard-face back">
+                  <div class="flash-ru" id="flashRu"></div>
+                  <div class="flash-tap-hint">нажмите ещё раз</div>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="flash-controls">
-            <button class="flash-nav-btn" id="flashPrev">‹</button>
-            <span class="flash-progress" id="flashProgress"></span>
-            <button class="flash-nav-btn" id="flashNext">›</button>
+            <div class="flash-controls">
+              <button class="flash-nav-btn" id="flashPrev">‹</button>
+              <span class="flash-progress" id="flashProgress"></span>
+              <button class="flash-nav-btn" id="flashNext">›</button>
+            </div>
           </div>
         </div>
       </section>
@@ -1379,6 +1395,7 @@ function activateTab(tabName){
   if(tabName === 'progress') renderProgress();
   if(tabName === 'schedule') initStudentSchedule();
   if(tabName === 'home') renderHome();
+  if(tabName === 'flashcards') initFlashcards();
   if(tabName === 'practice') renderPracticeHub();
   if(tabName === 'lessons') renderLessonsList();
   if(tabName === 'grammar') renderGrammarList();
@@ -1420,34 +1437,59 @@ function initAlphabet(){
 /* ================= FLASHCARDS ================= */
 async function initFlashcards(){
   flashcardsData = await loadFlashcardsData();
+  renderDictionaryList();
+}
+
+function renderDictionaryList(){
+  const listView = document.getElementById('dictionaryListView');
+  const detailView = document.getElementById('dictionaryDetailView');
+  const grid = document.getElementById('dictionaryCardGrid');
+  if(!grid) return;
+
+  listView.style.display = 'block';
+  detailView.style.display = 'none';
+
   const cats = Object.keys(flashcardsData);
-  const catRow = document.getElementById('catRow');
-  catRow.innerHTML = '';
   if(!cats.length){
-    document.querySelector('#section-flashcards .flash-wrap').style.display = 'none';
-    catRow.innerHTML = '<div class="empty-state">Пока нет карточек — преподаватель ещё не добавил материалы для этого раздела.</div>';
+    grid.innerHTML = '<div class="empty-state">Пока нет словаря — преподаватель ещё не добавил материалы для этого раздела.</div>';
     return;
   }
-  document.querySelector('#section-flashcards .flash-wrap').style.display = 'flex';
-  if(!currentCat || !cats.includes(currentCat)) currentCat = cats[0];
-  flashIndex = 0;
-  cats.forEach(cat=>{
-    const chip = document.createElement('button');
-    chip.className = 'cat-chip' + (cat===currentCat ? ' active' : '');
-    chip.textContent = cat;
-    chip.addEventListener('click', ()=>{
-      currentCat = cat; flashIndex = 0;
-      document.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('active'));
-      chip.classList.add('active');
-      renderFlashcard();
-      progress.lastCategory = cat;
-      saveProgress(studentId, progress);
+
+  grid.innerHTML = cats.map((cat,i) => {
+    const count = (flashcardsData[cat] || []).length;
+    return `
+      <div class="lesson-card" data-dict-i="${i}">
+        <div class="lesson-card-icon">📚</div>
+        <div class="lesson-card-num">Тема ${i+1}</div>
+        <div class="lesson-card-title">${cat}</div>
+        <div class="practice-tile-sub" style="margin-top:7px;">${count} ${count === 1 ? 'слово' : (count >= 2 && count <= 4 ? 'слова' : 'слов')}</div>
+      </div>`;
+  }).join('');
+
+  grid.querySelectorAll('[data-dict-i]').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      const cat = cats[parseInt(card.dataset.dictI)];
+      openDictionaryTopic(cat);
     });
-    catRow.appendChild(chip);
   });
-  renderFlashcard();
-  if(!progress.lastCategory){ progress.lastCategory = currentCat; saveProgress(studentId, progress); }
 }
+
+function openDictionaryTopic(cat){
+  const cats = Object.keys(flashcardsData);
+  if(!cats.includes(cat) || !flashcardsData[cat]?.length) return;
+  currentCat = cat;
+  flashIndex = 0;
+  document.getElementById('dictionaryListView').style.display = 'none';
+  document.getElementById('dictionaryDetailView').style.display = 'block';
+  document.getElementById('dictionaryDetailTitle').textContent = cat;
+  document.getElementById('dictionaryDetailCount').textContent = `${flashcardsData[cat].length} ${flashcardsData[cat].length === 1 ? 'слово' : (flashcardsData[cat].length >= 2 && flashcardsData[cat].length <= 4 ? 'слова' : 'слов')}`;
+  renderFlashcard();
+  progress.lastCategory = cat;
+  saveProgress(studentId, progress);
+}
+
+document.getElementById('dictionaryBackBtn').addEventListener('click', renderDictionaryList);
+
 function renderFlashcard(){
   const cards = flashcardsData[currentCat];
   if(!cards || !cards.length) return;
