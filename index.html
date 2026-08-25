@@ -599,6 +599,11 @@
     .stat-num{ font-size:32px; }
     .stat-label{ font-size:13.5px; }
   }
+
+  .mat-order-actions{display:flex;gap:5px;align-items:center;margin-left:10px;flex-shrink:0;}
+  .mat-order-btn{width:32px;height:32px;border:1px solid var(--panel-border);background:var(--panel-light);color:var(--text);border-radius:8px;cursor:pointer;font-size:15px;line-height:1;}
+  .mat-order-btn:hover{background:var(--gold-soft);color:var(--forest);}
+  .order-hint{font-size:12px;color:var(--muted);margin:-8px 0 14px;}
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -750,7 +755,7 @@
 
       <div class="admin-view" id="adminViewMaterials">
         <div class="admin-card">
-          <div class="admin-card-title">Карточки для повторения</div>
+          <div class="admin-card-title">Карточки для повторения</div><div class="order-hint">Новые элементы добавляются в конец. Кнопки ↑ ↓ меняют порядок.</div>
           <button class="mat-seed-btn" id="seedFlashcardsBtn">Загрузить стартовый набор (демо-карточки)</button>
           <div class="mat-form-grid">
             <div class="field"><label>Категория</label><input type="text" id="newCardCat" placeholder="Например, Еда" list="catList"><datalist id="catList"></datalist></div>
@@ -764,7 +769,7 @@
         </div>
 
         <div class="admin-card">
-          <div class="admin-card-title">Вопросы для квиза</div>
+          <div class="admin-card-title">Вопросы для квиза</div><div class="order-hint">Новые элементы добавляются в конец. Кнопки ↑ ↓ меняют порядок.</div>
           <button class="mat-seed-btn" id="seedQuizBtn">Загрузить стартовый набор (демо-вопросы)</button>
           <div class="field"><label>Название квиза</label><input type="text" id="newQQuizName" placeholder="Например, Алфавит и базовая лексика" list="quizNameList"><datalist id="quizNameList"></datalist></div>
           <div class="field"><label>Арабское слово (необязательно)</label><input type="text" id="newQAr" placeholder="Оставьте пустым, если не нужно"></div>
@@ -787,7 +792,7 @@
 
       <div class="admin-view" id="adminViewContent">
         <div class="admin-card">
-          <div class="admin-card-title">Уроки</div>
+          <div class="admin-card-title">Уроки</div><div class="order-hint">Новые элементы добавляются в конец. Кнопки ↑ ↓ меняют порядок.</div>
           <div class="field"><label>Заголовок</label><input type="text" id="newLessonTitle" placeholder="Например, Урок 1. Приветствия"></div>
           <div class="field"><label>Текст урока</label><textarea id="newLessonBody" rows="4" style="width:100%; background:var(--panel-light); border:1px solid var(--panel-border); border-radius:9px; padding:11px 13px; color:var(--text); font-size:14px; font-family:inherit; resize:vertical;" placeholder="Текст, который увидит ученик"></textarea></div>
           <button class="btn-primary" id="addLessonNoteBtn" style="max-width:200px;">Добавить урок</button>
@@ -795,7 +800,7 @@
           <div style="margin-top:18px;" id="lessonNotesList"></div>
         </div>
         <div class="admin-card">
-          <div class="admin-card-title">Грамматика</div>
+          <div class="admin-card-title">Грамматика</div><div class="order-hint">Новые элементы добавляются в конец. Кнопки ↑ ↓ меняют порядок.</div>
           <div class="field"><label>Заголовок темы</label><input type="text" id="newGrammarTitle" placeholder="Например, Определённый артикль ال"></div>
           <div class="field"><label>Объяснение</label><textarea id="newGrammarBody" rows="4" style="width:100%; background:var(--panel-light); border:1px solid var(--panel-border); border-radius:9px; padding:11px 13px; color:var(--text); font-size:14px; font-family:inherit; resize:vertical;" placeholder="Текст объяснения темы"></textarea></div>
           <button class="btn-primary" id="addGrammarNoteBtn" style="max-width:200px;">Добавить тему</button>
@@ -1162,29 +1167,12 @@ let flashcardsData = {}; // { category: [{id,ar,translit,ru}] }
 let quizzesData = {}; // { quizName: [{id,ar,q,options,correct}] }
 let currentQuizName = null;
 
-async function loadFlashcardsData(){
-  try{
-    const snap = await db.collection('flashcards').get();
-    const map = {};
-    snap.docs.forEach(d=>{
-      const c = d.data();
-      (map[c.category] = map[c.category] || []).push({ id:d.id, ar:c.ar, translit:c.translit, ru:c.ru });
-    });
-    return map;
-  }catch(e){ console.error('load flashcards failed', e); return {}; }
-}
-async function loadQuizzesData(){
-  try{
-    const snap = await db.collection('quizQuestions').get();
-    const map = {};
-    snap.docs.forEach(d=>{
-      const q = d.data();
-      const name = q.quizName || 'Общий квиз';
-      (map[name] = map[name] || []).push({ id:d.id, ar:q.ar, q:q.q, options:q.options, correct:q.correct });
-    });
-    return map;
-  }catch(e){ console.error('load quizzes failed', e); return {}; }
-}
+function orderValue(v,fallback){return Number.isFinite(Number(v))?Number(v):fallback;}
+async function ensureCollectionOrder(collection,groupField=null){try{const snap=await db.collection(collection).get(),groups={};snap.docs.forEach((d,i)=>{const x=d.data(),k=groupField?String(x[groupField]||''):'__all__';(groups[k]=groups[k]||[]).push({doc:d,data:x,index:i});});const writes=[];Object.values(groups).forEach(a=>{a.sort((x,y)=>{const xo=Number(x.data.order),yo=Number(y.data.order);if(Number.isFinite(xo)&&Number.isFinite(yo))return xo-yo;if(Number.isFinite(xo))return -1;if(Number.isFinite(yo))return 1;return x.index-y.index;});a.forEach((x,i)=>{if(!Number.isFinite(Number(x.data.order))||Number(x.data.order)!==i)writes.push(x.doc.ref.update({order:i}));});});if(writes.length)await Promise.all(writes);}catch(e){console.error('ensure order failed',collection,e);}}
+async function getNextOrder(collection,groupField=null,groupValue=null){const snap=await db.collection(collection).get();let max=-1;snap.docs.forEach(d=>{const x=d.data();if(groupField&&String(x[groupField]||'')!==String(groupValue||''))return;const n=Number(x.order);if(Number.isFinite(n))max=Math.max(max,n);});return max+1;}
+async function moveItem(collection,id,direction,groupField=null,groupValue=null,refreshFn=null){const snap=await db.collection(collection).get();const a=snap.docs.filter(d=>{const x=d.data();return !groupField||String(x[groupField]||'')===String(groupValue||'');}).map((d,i)=>({doc:d,data:d.data(),index:i}));a.sort((x,y)=>orderValue(x.data.order,x.index)-orderValue(y.data.order,y.index));const i=a.findIndex(x=>x.doc.id===id),j=i+direction;if(i<0||j<0||j>=a.length)return;const ao=orderValue(a[i].data.order,i),bo=orderValue(a[j].data.order,j);await Promise.all([a[i].doc.ref.update({order:bo}),a[j].doc.ref.update({order:ao})]);if(refreshFn)await refreshFn();}
+async function loadFlashcardsData(){try{await ensureCollectionOrder('flashcards','category');const snap=await db.collection('flashcards').get(),map={};snap.docs.forEach(d=>{const c=d.data();(map[c.category]=map[c.category]||[]).push({id:d.id,ar:c.ar,translit:c.translit,ru:c.ru,order:c.order});});Object.values(map).forEach(a=>a.sort((x,y)=>x.order-y.order));return map;}catch(e){console.error('load flashcards failed',e);return {};}}
+async function loadQuizzesData(){try{await ensureCollectionOrder('quizQuestions','quizName');const snap=await db.collection('quizQuestions').get(),map={};snap.docs.forEach(d=>{const q=d.data(),name=q.quizName||'Общий квиз';(map[name]=map[name]||[]).push({id:d.id,ar:q.ar,q:q.q,options:q.options,correct:q.correct,order:q.order});});Object.values(map).forEach(a=>a.sort((x,y)=>x.order-y.order));return map;}catch(e){console.error('load quizzes failed',e);return {};}}
 
 /* ================= STORAGE HELPERS ================= */
 async function loadProgress(id){
@@ -1921,7 +1909,7 @@ async function renderMaterialsAdmin(){
           <div class="mat-list-cat">${c.category}</div>
           <div class="mat-list-main"><span class="mat-list-ar arabic">${c.ar}</span><span class="mat-list-sub">${c.translit} — ${c.ru}</span></div>
         </div>
-        <button class="lesson-del-btn" data-del-card="${c.id}">Удалить</button>
+        <div class="mat-order-actions"><button class="mat-order-btn" data-move-card="-1" data-move-id="${c.id}" data-move-group="${c.category}">↑</button><button class="mat-order-btn" data-move-card="1" data-move-id="${c.id}" data-move-group="${c.category}">↓</button><button class="lesson-del-btn" data-del-card="${c.id}">Удалить</button></div>
       </div>`).join('');
     cardsListEl.querySelectorAll('[data-del-card]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
@@ -1945,7 +1933,7 @@ async function renderMaterialsAdmin(){
               <div class="mat-list-main">${q.ar ? `<span class="mat-list-ar arabic">${q.ar}</span>` : ''}<span class="mat-list-sub">${q.q}</span></div>
               <div class="mat-q-options">${q.options.map((o,i)=> i===q.correct ? `<span class="mat-q-correct">${o} ✓</span>` : o).join(' · ')}</div>
             </div>
-            <button class="lesson-del-btn" data-del-q="${q.id}">Удалить</button>
+            <div class="mat-order-actions"><button class="mat-order-btn" data-move-q="-1" data-move-id="${q.id}" data-move-group="${name}">↑</button><button class="mat-order-btn" data-move-q="1" data-move-id="${q.id}" data-move-group="${name}">↓</button><button class="lesson-del-btn" data-del-q="${q.id}">Удалить</button></div>
           </div>`).join('')}
       </div>`).join('');
     quizListEl.querySelectorAll('[data-del-q]').forEach(btn=>{
@@ -1954,8 +1942,11 @@ async function renderMaterialsAdmin(){
         await renderMaterialsAdmin();
       });
     });
+    quizListEl.querySelectorAll('[data-move-q]').forEach(btn=>btn.addEventListener('click',async()=>moveItem('quizQuestions',btn.dataset.moveId,Number(btn.dataset.moveQ),'quizName',btn.dataset.moveGroup,renderMaterialsAdmin)));
   }
+  cardsListEl.querySelectorAll('[data-move-card]').forEach(btn=>btn.addEventListener('click',async()=>moveItem('flashcards',btn.dataset.moveId,Number(btn.dataset.moveCard),'category',btn.dataset.moveGroup,renderMaterialsAdmin)));
 }
+
 
 document.getElementById('addCardBtn').addEventListener('click', async ()=>{
   const errEl = document.getElementById('cardError');
@@ -1966,7 +1957,7 @@ document.getElementById('addCardBtn').addEventListener('click', async ()=>{
   if(!category || !ar || !ru){ errEl.textContent = 'Заполните категорию, слово и перевод.'; return; }
   errEl.textContent = '';
   try{
-    await db.collection('flashcards').add({ category, ar, translit, ru });
+    const order=await getNextOrder('flashcards','category',category); await db.collection('flashcards').add({category,ar,translit,ru,order});
   }catch(e){ console.error(e); errEl.textContent = 'Не удалось сохранить.'; return; }
   document.getElementById('newCardAr').value = '';
   document.getElementById('newCardTranslit').value = '';
@@ -1988,7 +1979,7 @@ document.getElementById('addQBtn').addEventListener('click', async ()=>{
   if(!quizName || !q || options.some(o=>!o)){ errEl.textContent = 'Заполните название квиза, вопрос и все три варианта.'; return; }
   errEl.textContent = '';
   try{
-    await db.collection('quizQuestions').add({ quizName, ar, q, options, correct });
+    const order=await getNextOrder('quizQuestions','quizName',quizName); await db.collection('quizQuestions').add({quizName,ar,q,options,correct,order});
   }catch(e){ console.error(e); errEl.textContent = 'Не удалось сохранить.'; return; }
   document.getElementById('newQAr').value = '';
   document.getElementById('newQText').value = '';
@@ -2117,14 +2108,16 @@ async function renderPracticeHub(){
 /* ================= LESSONS & GRAMMAR (content) ================= */
 async function loadLessonNotes(){
   try{
+    await ensureCollectionOrder('lessonNotes');
     const snap = await db.collection('lessonNotes').get();
-    return snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    return snap.docs.map(d=>({ id:d.id, ...d.data() })).sort((a,b)=>orderValue(a.order,0)-orderValue(b.order,0));
   }catch(e){ console.error('load lesson notes failed', e); return []; }
 }
 async function loadGrammarNotes(){
   try{
+    await ensureCollectionOrder('grammarNotes');
     const snap = await db.collection('grammarNotes').get();
-    return snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    return snap.docs.map(d=>({ id:d.id, ...d.data() })).sort((a,b)=>orderValue(a.order,0)-orderValue(b.order,0));
   }catch(e){ console.error('load grammar notes failed', e); return []; }
 }
 async function renderLessonsList(){
@@ -2192,8 +2185,9 @@ document.getElementById('grammarBackBtn').addEventListener('click', renderGramma
 /* ---- LISTENING / READING / WRITING (student, read-only) ---- */
 async function loadTasks(collection){
   try{
+    await ensureCollectionOrder(collection);
     const snap = await db.collection(collection).get();
-    return snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    return snap.docs.map(d=>({ id:d.id, ...d.data() })).sort((a,b)=>orderValue(a.order,0)-orderValue(b.order,0));
   }catch(e){ console.error('load tasks failed', e); return []; }
 }
 function renderTaskListInto(elId, list, emptyMsg){
@@ -2218,7 +2212,7 @@ async function renderContentAdmin(){
   lEl.innerHTML = !lessons.length ? '<div class="empty-state">Пока нет дополнительных уроков (Урок 1 — Алфавит есть всегда).</div>' : lessons.map(l=>`
     <div class="mat-list-item">
       <div class="mat-list-item-body"><div class="mat-list-sub" style="font-weight:700; color:var(--text);">${l.title}</div></div>
-      <button class="lesson-del-btn" data-del-lesson="${l.id}">Удалить</button>
+      <div class="mat-order-actions"><button class="mat-order-btn" data-move="-1" data-move-id="${l.id}">↑</button><button class="mat-order-btn" data-move="1" data-move-id="${l.id}">↓</button><button class="lesson-del-btn" data-del-lesson="${l.id}">Удалить</button></div>
     </div>`).join('');
   lEl.querySelectorAll('[data-del-lesson]').forEach(btn=>{
     btn.addEventListener('click', async ()=>{ await db.collection('lessonNotes').doc(btn.dataset.delLesson).delete(); await renderContentAdmin(); });
@@ -2227,19 +2221,21 @@ async function renderContentAdmin(){
   gEl.innerHTML = !grammar.length ? '<div class="empty-state">Пока нет тем.</div>' : grammar.map(g=>`
     <div class="mat-list-item">
       <div class="mat-list-item-body"><div class="mat-list-sub" style="font-weight:700; color:var(--text);">${g.title}</div></div>
-      <button class="lesson-del-btn" data-del-grammar="${g.id}">Удалить</button>
+      <div class="mat-order-actions"><button class="mat-order-btn" data-move="-1" data-move-id="${g.id}">↑</button><button class="mat-order-btn" data-move="1" data-move-id="${g.id}">↓</button><button class="lesson-del-btn" data-del-grammar="${g.id}">Удалить</button></div>
     </div>`).join('');
   gEl.querySelectorAll('[data-del-grammar]').forEach(btn=>{
     btn.addEventListener('click', async ()=>{ await db.collection('grammarNotes').doc(btn.dataset.delGrammar).delete(); await renderContentAdmin(); });
-  });
+  });  lEl.querySelectorAll('[data-move]').forEach(btn=>btn.addEventListener('click',async()=>moveItem('lessonNotes',btn.dataset.moveId,Number(btn.dataset.move),null,null,renderContentAdmin)));
+  gEl.querySelectorAll('[data-move]').forEach(btn=>btn.addEventListener('click',async()=>moveItem('grammarNotes',btn.dataset.moveId,Number(btn.dataset.move),null,null,renderContentAdmin)));
 }
+
 document.getElementById('addLessonNoteBtn').addEventListener('click', async ()=>{
   const errEl = document.getElementById('lessonNoteError');
   const title = document.getElementById('newLessonTitle').value.trim();
   const body = document.getElementById('newLessonBody').value.trim();
   if(!title || !body){ errEl.textContent = 'Заполните заголовок и текст.'; return; }
   errEl.textContent = '';
-  try{ await db.collection('lessonNotes').add({ title, body }); }
+  try{ const order=await getNextOrder('lessonNotes'); await db.collection('lessonNotes').add({title,body,order}); }
   catch(e){ console.error(e); errEl.textContent = 'Не удалось сохранить.'; return; }
   document.getElementById('newLessonTitle').value = '';
   document.getElementById('newLessonBody').value = '';
@@ -2251,7 +2247,7 @@ document.getElementById('addGrammarNoteBtn').addEventListener('click', async ()=
   const body = document.getElementById('newGrammarBody').value.trim();
   if(!title || !body){ errEl.textContent = 'Заполните заголовок и текст.'; return; }
   errEl.textContent = '';
-  try{ await db.collection('grammarNotes').add({ title, body }); }
+  try{ const order=await getNextOrder('grammarNotes'); await db.collection('grammarNotes').add({title,body,order}); }
   catch(e){ console.error(e); errEl.textContent = 'Не удалось сохранить.'; return; }
   document.getElementById('newGrammarTitle').value = '';
   document.getElementById('newGrammarBody').value = '';
@@ -2263,7 +2259,7 @@ function taskAdminRow(t, collection, refreshFn){
   return `
     <div class="mat-list-item">
       <div class="mat-list-item-body"><div class="mat-list-sub" style="font-weight:700; color:var(--text);">${t.title}</div></div>
-      <button class="lesson-del-btn" data-del-task="${t.id}" data-coll="${collection}">Удалить</button>
+      <div class="mat-order-actions"><button class="mat-order-btn" data-move-task="-1" data-move-id="${t.id}" data-coll="${collection}">↑</button><button class="mat-order-btn" data-move-task="1" data-move-id="${t.id}" data-coll="${collection}">↓</button><button class="lesson-del-btn" data-del-task="${t.id}" data-coll="${collection}">Удалить</button></div>
     </div>`;
 }
 async function renderTasksAdmin(){
@@ -2287,7 +2283,7 @@ document.getElementById('addListenBtn').addEventListener('click', async ()=>{
   const link = document.getElementById('newListenLink').value.trim();
   if(!title || !body){ errEl.textContent = 'Заполните заголовок и описание.'; return; }
   errEl.textContent = '';
-  try{ await db.collection('listeningTasks').add({ title, body, link }); }
+  try{ const order=await getNextOrder('listeningTasks'); await db.collection('listeningTasks').add({title,body,link,order}); }
   catch(e){ console.error(e); errEl.textContent = 'Не удалось сохранить.'; return; }
   document.getElementById('newListenTitle').value = '';
   document.getElementById('newListenBody').value = '';
@@ -2301,7 +2297,7 @@ document.getElementById('addReadBtn').addEventListener('click', async ()=>{
   const link = document.getElementById('newReadLink').value.trim();
   if(!title || !body){ errEl.textContent = 'Заполните заголовок и текст.'; return; }
   errEl.textContent = '';
-  try{ await db.collection('readingTasks').add({ title, body, link }); }
+  try{ const order=await getNextOrder('readingTasks'); await db.collection('readingTasks').add({title,body,link,order}); }
   catch(e){ console.error(e); errEl.textContent = 'Не удалось сохранить.'; return; }
   document.getElementById('newReadTitle').value = '';
   document.getElementById('newReadBody').value = '';
@@ -2315,7 +2311,7 @@ document.getElementById('addWriteBtn').addEventListener('click', async ()=>{
   const link = document.getElementById('newWriteLink').value.trim();
   if(!title || !body){ errEl.textContent = 'Заполните заголовок и описание.'; return; }
   errEl.textContent = '';
-  try{ await db.collection('writingTasks').add({ title, body, link }); }
+  try{ const order=await getNextOrder('writingTasks'); await db.collection('writingTasks').add({title,body,link,order}); }
   catch(e){ console.error(e); errEl.textContent = 'Не удалось сохранить.'; return; }
   document.getElementById('newWriteTitle').value = '';
   document.getElementById('newWriteBody').value = '';
