@@ -438,7 +438,11 @@
   .admin-item-main{ flex:1; min-width:0; }
   .admin-item-title{ font-size:13px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .admin-item-sub{ font-size:11px; color:var(--muted); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .admin-item-ar{ font-family:'Amiri',serif; color:var(--arabic-dark); font-size:17px; flex:0 0 auto; }
+  .admin-item-ar{ font-family:'Amiri',serif; color:var(--arabic-dark); font-size:17px; flex:0 1 42%; min-width:90px; white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.35; }
+  .admin-category-actions{ display:flex; align-items:center; gap:4px; margin-left:auto; }
+  .admin-category-actions .mat-order-btn{ border:1px solid var(--panel-border); background:none; border-radius:6px; cursor:pointer; font:700 11px inherit; padding:5px 7px; color:var(--gold-soft); }
+  .admin-category-actions .mat-order-btn:disabled{ opacity:.35; cursor:default; }
+  .card-phrase-help{ margin:-6px 0 10px; color:var(--muted); font-size:11px; }
   .admin-item-actions{ display:flex; align-items:center; gap:4px; flex:0 0 auto; }
   .admin-item-actions button{ border:1px solid var(--panel-border); background:none; border-radius:6px; cursor:pointer; font:700 11px inherit; padding:5px 7px; }
   .admin-item-actions .mat-order-btn{ color:var(--gold-soft); }
@@ -818,7 +822,7 @@
               <button class="mat-seed-btn" id="seedFlashcardsBtn">Загрузить стартовый набор</button>
               <div class="mat-form-grid">
                 <div class="field"><label>Категория</label><input type="text" id="newCardCat" placeholder="Например, Еда" list="catList"><datalist id="catList"></datalist></div>
-                <div class="field"><label>Арабское слово</label><input type="text" id="newCardAr" placeholder="مثال"></div>
+                <div class="field"><label>Арабское слово / фраза</label><textarea id="newCardAr" rows="3" placeholder="مثال أو جملة طويلة"></textarea><div class="card-phrase-help">Shift + Enter — перенос строки</div></div>
                 <div class="field"><label>Транслитерация</label><input type="text" id="newCardTranslit" placeholder="mithāl"></div>
                 <div class="field"><label>Перевод</label><input type="text" id="newCardRu" placeholder="Пример"></div>
               </div>
@@ -1210,9 +1214,12 @@ let currentQuizName = null;
 
 function orderValue(v,fallback){return Number.isFinite(Number(v))?Number(v):fallback;}
 async function ensureCollectionOrder(collection,groupField=null){try{const snap=await db.collection(collection).get(),groups={};snap.docs.forEach((d,i)=>{const x=d.data(),k=groupField?String(x[groupField]||''):'__all__';(groups[k]=groups[k]||[]).push({doc:d,data:x,index:i});});const writes=[];Object.values(groups).forEach(a=>{a.sort((x,y)=>{const xo=Number(x.data.order),yo=Number(y.data.order);if(Number.isFinite(xo)&&Number.isFinite(yo))return xo-yo;if(Number.isFinite(xo))return -1;if(Number.isFinite(yo))return 1;return x.index-y.index;});a.forEach((x,i)=>{if(!Number.isFinite(Number(x.data.order))||Number(x.data.order)!==i)writes.push(x.doc.ref.update({order:i}));});});if(writes.length)await Promise.all(writes);}catch(e){console.error('ensure order failed',collection,e);}}
+async function ensureCategoryOrder(){try{const snap=await db.collection('flashcards').get(),groups={};snap.docs.forEach((d,i)=>{const x=d.data(),k=String(x.category||'');(groups[k]=groups[k]||[]).push({doc:d,data:x,index:i});});const cats=Object.entries(groups);cats.sort(([,a],[,b])=>{const ao=Number(a[0]?.data?.categoryOrder),bo=Number(b[0]?.data?.categoryOrder);if(Number.isFinite(ao)&&Number.isFinite(bo))return ao-bo;if(Number.isFinite(ao))return -1;if(Number.isFinite(bo))return 1;return a[0].index-b[0].index;});const writes=[];cats.forEach(([,items],i)=>items.forEach(x=>{if(!Number.isFinite(Number(x.data.categoryOrder))||Number(x.data.categoryOrder)!==i)writes.push(x.doc.ref.update({categoryOrder:i}));}));if(writes.length)await Promise.all(writes);}catch(e){console.error('ensure category order failed',e);}}
 async function getNextOrder(collection,groupField=null,groupValue=null){const snap=await db.collection(collection).get();let max=-1;snap.docs.forEach(d=>{const x=d.data();if(groupField&&String(x[groupField]||'')!==String(groupValue||''))return;const n=Number(x.order);if(Number.isFinite(n))max=Math.max(max,n);});return max+1;}
+async function getNextCategoryOrder(){const snap=await db.collection('flashcards').get();let max=-1;snap.docs.forEach(d=>{const n=Number(d.data().categoryOrder);if(Number.isFinite(n))max=Math.max(max,n);});return max+1;}
 async function moveItem(collection,id,direction,groupField=null,groupValue=null,refreshFn=null){const snap=await db.collection(collection).get();const a=snap.docs.filter(d=>{const x=d.data();return !groupField||String(x[groupField]||'')===String(groupValue||'');}).map((d,i)=>({doc:d,data:d.data(),index:i}));a.sort((x,y)=>orderValue(x.data.order,x.index)-orderValue(y.data.order,y.index));const i=a.findIndex(x=>x.doc.id===id),j=i+direction;if(i<0||j<0||j>=a.length)return;const ao=orderValue(a[i].data.order,i),bo=orderValue(a[j].data.order,j);await Promise.all([a[i].doc.ref.update({order:bo}),a[j].doc.ref.update({order:ao})]);if(refreshFn)await refreshFn();}
-async function loadFlashcardsData(){try{await ensureCollectionOrder('flashcards','category');const snap=await db.collection('flashcards').get(),map={};snap.docs.forEach(d=>{const c=d.data();(map[c.category]=map[c.category]||[]).push({id:d.id,ar:c.ar,translit:c.translit,ru:c.ru,order:c.order});});Object.values(map).forEach(a=>a.sort((x,y)=>x.order-y.order));return map;}catch(e){console.error('load flashcards failed',e);return {};}}
+async function moveCategory(category,direction,refreshFn=null){const snap=await db.collection('flashcards').get(),groups={};snap.docs.forEach(d=>{const x=d.data(),k=String(x.category||'');(groups[k]=groups[k]||[]).push({doc:d,data:x});});const cats=Object.entries(groups).sort((a,b)=>orderValue(a[1][0].data.categoryOrder,a[0])-orderValue(b[1][0].data.categoryOrder,b[0]));const i=cats.findIndex(([name])=>name===category),j=i+direction;if(i<0||j<0||j>=cats.length)return;const ao=orderValue(cats[i][1][0].data.categoryOrder,i),bo=orderValue(cats[j][1][0].data.categoryOrder,j);const writes=[];cats[i][1].forEach(x=>writes.push(x.doc.ref.update({categoryOrder:bo})));cats[j][1].forEach(x=>writes.push(x.doc.ref.update({categoryOrder:ao})));await Promise.all(writes);if(refreshFn)await refreshFn();}
+async function loadFlashcardsData(){try{await ensureCollectionOrder('flashcards','category');await ensureCategoryOrder();const snap=await db.collection('flashcards').get(),map={};snap.docs.forEach(d=>{const c=d.data();(map[c.category]=map[c.category]||[]).push({id:d.id,ar:c.ar,translit:c.translit,ru:c.ru,order:c.order,categoryOrder:c.categoryOrder});});Object.values(map).forEach(a=>a.sort((x,y)=>x.order-y.order));return Object.fromEntries(Object.entries(map).sort(([,a],[,b])=>orderValue(a[0]?.categoryOrder,0)-orderValue(b[0]?.categoryOrder,0)));}catch(e){console.error('load flashcards failed',e);return {};}}
 async function loadQuizzesData(){try{await ensureCollectionOrder('quizQuestions','quizName');const snap=await db.collection('quizQuestions').get(),map={};snap.docs.forEach(d=>{const q=d.data(),name=q.quizName||'Общий квиз';(map[name]=map[name]||[]).push({id:d.id,ar:q.ar,q:q.q,options:q.options,correct:q.correct,order:q.order});});Object.values(map).forEach(a=>a.sort((x,y)=>x.order-y.order));return map;}catch(e){console.error('load quizzes failed',e);return {};}}
 
 /* ================= STORAGE HELPERS ================= */
@@ -1933,6 +1940,7 @@ async function renderHomeworkBanner(){
 function escapeHtml(value){return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
 function setupAdminSearch(inputId,containerIds,emptyIds){const input=document.getElementById(inputId);if(!input)return;input.oninput=()=>{const q=input.value.trim().toLowerCase();containerIds.forEach((id,i)=>{const root=document.getElementById(id);if(!root)return;let visible=0;const groups=root.querySelectorAll('[data-search-group]');if(groups.length){groups.forEach(group=>{const own=(group.dataset.searchGroup||'');const items=[...group.querySelectorAll('[data-search-item]')];const groupMatch=!q||own.includes(q);let itemMatch=0;items.forEach(item=>{const match=!q||groupMatch||(item.dataset.searchItem||'').includes(q);item.style.display=match?'':'none';if(match)itemMatch++;});const show=groupMatch||itemMatch>0;group.style.display=show?'':'none';if(show)visible++;});}else{root.querySelectorAll('[data-search-item]').forEach(item=>{const match=!q||(item.dataset.searchItem||'').includes(q);item.style.display=match?'':'none';if(match)visible++;});}if(emptyIds[i])document.getElementById(emptyIds[i])?.classList.toggle('show',!!q&&visible===0);});};}
 document.querySelectorAll('.admin-create-toggle').forEach(btn=>btn.addEventListener('click',()=>{const panel=document.getElementById(btn.dataset.target);const open=panel.classList.toggle('open');btn.textContent=open?'Закрыть':' + Добавить';}));
+const cardArField=document.getElementById('newCardAr'); if(cardArField){ cardArField.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); } }); }
 
 /* ================= MATERIALS MANAGEMENT (admin) ================= */
 async function renderMaterialsAdmin(){
@@ -1947,7 +1955,7 @@ async function renderMaterialsAdmin(){
   document.getElementById('cardsMeta').textContent = `${cardGroups.length} категорий · ${cardGroups.reduce((n,[,a])=>n+a.length,0)} слов`;
   cardsListEl.innerHTML = !cardGroups.length ? '<div class="admin-empty">Пока нет карточек. Создай первую категорию.</div>' : `<div class="admin-group-grid">${cardGroups.map(([cat,arr])=>`
     <div class="admin-group-card" data-group-card="${escapeHtml(cat)}" data-search-group="${escapeHtml(cat).toLowerCase()}">
-      <div class="admin-group-card-head"><div class="admin-group-name">📁 ${escapeHtml(cat)}</div><div class="admin-group-count">${arr.length} слов</div></div>
+      <div class="admin-group-card-head"><div class="admin-group-name">📁 ${escapeHtml(cat)}</div><div class="admin-category-actions"><button class="mat-order-btn" title="Поднять категорию" data-move-category="-1" data-category="${escapeHtml(cat)}">↑</button><button class="mat-order-btn" title="Опустить категорию" data-move-category="1" data-category="${escapeHtml(cat)}">↓</button><div class="admin-group-count">${arr.length} слов</div></div></div>
       <button class="admin-group-open" type="button" data-toggle-group>Открыть слова ↓</button>
       <div class="admin-group-items"><div class="admin-items-stack">${arr.map(c=>`
         <div class="admin-item" data-search-item="${escapeHtml((c.ar+' '+c.translit+' '+c.ru+' '+cat).toLowerCase())}">
@@ -1973,6 +1981,7 @@ async function renderMaterialsAdmin(){
   cardsListEl.querySelectorAll('[data-del-card]').forEach(btn=>btn.addEventListener('click',async()=>{await db.collection('flashcards').doc(btn.dataset.delCard).delete();await renderMaterialsAdmin();}));
   quizListEl.querySelectorAll('[data-del-q]').forEach(btn=>btn.addEventListener('click',async()=>{await db.collection('quizQuestions').doc(btn.dataset.delQ).delete();await renderMaterialsAdmin();}));
   cardsListEl.querySelectorAll('[data-move-card]').forEach(btn=>btn.addEventListener('click',async()=>moveItem('flashcards',btn.dataset.moveId,Number(btn.dataset.moveCard),'category',btn.dataset.moveGroup,renderMaterialsAdmin)));
+  cardsListEl.querySelectorAll('[data-move-category]').forEach(btn=>btn.addEventListener('click',async()=>moveCategory(btn.dataset.category,Number(btn.dataset.moveCategory),renderMaterialsAdmin)));
   quizListEl.querySelectorAll('[data-move-q]').forEach(btn=>btn.addEventListener('click',async()=>moveItem('quizQuestions',btn.dataset.moveId,Number(btn.dataset.moveQ),'quizName',btn.dataset.moveGroup,renderMaterialsAdmin)));
   setupAdminSearch('materialsSearch',['cardsList','quizList'],['cardsFilterEmpty','quizFilterEmpty']);
 }
@@ -1987,7 +1996,7 @@ document.getElementById('addCardBtn').addEventListener('click', async ()=>{
   if(!category || !ar || !ru){ errEl.textContent = 'Заполните категорию, слово и перевод.'; return; }
   errEl.textContent = '';
   try{
-    const order=await getNextOrder('flashcards','category',category); await db.collection('flashcards').add({category,ar,translit,ru,order});
+    const order=await getNextOrder('flashcards','category',category); const snap=await db.collection('flashcards').where('category','==',category).limit(1).get(); const categoryOrder=snap.empty?await getNextCategoryOrder():orderValue(snap.docs[0].data().categoryOrder,await getNextCategoryOrder()); await db.collection('flashcards').add({category,ar,translit,ru,order,categoryOrder});
   }catch(e){ console.error(e); errEl.textContent = 'Не удалось сохранить.'; return; }
   document.getElementById('newCardAr').value = '';
   document.getElementById('newCardTranslit').value = '';
@@ -2023,11 +2032,16 @@ document.getElementById('addQBtn').addEventListener('click', async ()=>{
 document.getElementById('seedFlashcardsBtn').addEventListener('click', async ()=>{
   if(!confirm('Добавить демо-карточки (Приветствия, Семья, Числа, Фразы) в базу?')) return;
   const writes = [];
-  Object.entries(SEED_FLASHCARDS).forEach(([category, arr])=>{
-    arr.forEach(([ar,translit,ru])=>{
-      writes.push(db.collection('flashcards').add({ category, ar, translit, ru }));
-    });
-  });
+  const existing = await db.collection('flashcards').get();
+  const categoryOrders = {};
+  let maxCategoryOrder = -1;
+  existing.docs.forEach(d=>{ const x=d.data(); const co=Number(x.categoryOrder); if(Number.isFinite(co)) maxCategoryOrder=Math.max(maxCategoryOrder,co); if(x.category && Number.isFinite(co)) categoryOrders[x.category]=co; });
+  for(const [category, arr] of Object.entries(SEED_FLASHCARDS)){
+    if(!Number.isFinite(categoryOrders[category])) categoryOrders[category]=++maxCategoryOrder;
+    const current = existing.docs.filter(d=>d.data().category===category).map(d=>Number(d.data().order)).filter(Number.isFinite);
+    let order=current.length?Math.max(...current)+1:-1;
+    arr.forEach(([ar,translit,ru])=>{ order++; writes.push(db.collection('flashcards').add({ category, ar, translit, ru, order, categoryOrder:categoryOrders[category] })); });
+  }
   await Promise.all(writes);
   await renderMaterialsAdmin();
 });
