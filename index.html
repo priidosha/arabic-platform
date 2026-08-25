@@ -401,6 +401,56 @@
   .radio-row{ display:flex; gap:14px; margin-top:6px; flex-wrap:wrap; }
   .radio-row label{ display:flex; align-items:center; gap:5px; font-size:12.5px; color:var(--muted); cursor:pointer; }
 
+
+  /* ---------- TEACHER CONTENT HUB REDESIGN ---------- */
+  .admin-main{ max-width:1120px; }
+  .admin-content-head{ display:flex; justify-content:space-between; align-items:flex-end; gap:18px; margin:2px 0 18px; }
+  .admin-content-head h2{ margin:0; font-size:24px; letter-spacing:-.3px; }
+  .admin-content-head p{ margin:5px 0 0; color:var(--muted); font-size:13px; line-height:1.5; }
+  .admin-search{ width:280px; flex:0 1 320px; }
+  .admin-search input{ width:100%; box-sizing:border-box; background:var(--panel); border:1px solid var(--panel-border); border-radius:10px; padding:11px 13px; color:var(--text); font:inherit; outline:none; }
+  .admin-search input:focus{ border-color:var(--gold); }
+  .admin-section-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+  .admin-section-card{ background:var(--panel); border:1px solid var(--panel-border); border-radius:16px; padding:18px; min-width:0; }
+  .admin-section-card.wide{ grid-column:1/-1; }
+  .admin-section-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; }
+  .admin-section-title{ display:flex; align-items:center; gap:10px; font-size:16px; font-weight:800; }
+  .admin-section-icon{ width:34px; height:34px; border-radius:10px; display:grid; place-items:center; background:var(--panel-light); border:1px solid var(--panel-border); font-size:17px; }
+  .admin-section-meta{ color:var(--muted); font-size:12px; margin-top:3px; }
+  .admin-create-toggle{ background:var(--forest); color:var(--cream-text); border:0; border-radius:9px; padding:8px 12px; font:700 12px inherit; cursor:pointer; white-space:nowrap; }
+  .admin-create-toggle:hover{ filter:brightness(1.08); }
+  .admin-create-panel{ display:none; background:var(--panel-light); border:1px solid var(--panel-border); border-radius:12px; padding:15px; margin-bottom:15px; }
+  .admin-create-panel.open{ display:block; }
+  .admin-create-panel .mat-seed-btn{ margin-bottom:10px; }
+  .admin-create-panel .btn-primary{ margin-top:8px; }
+  .admin-group-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  .admin-group-card{ background:var(--panel-light); border:1px solid var(--panel-border); border-radius:12px; padding:13px; transition:.16s; min-width:0; }
+  .admin-group-card:hover{ border-color:var(--gold); transform:translateY(-1px); }
+  .admin-group-card-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+  .admin-group-name{ font-size:14px; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .admin-group-count{ font-size:11px; color:var(--muted); white-space:nowrap; }
+  .admin-group-open{ margin-top:9px; background:none; border:1px solid var(--panel-border); color:var(--gold-soft); border-radius:7px; padding:6px 9px; font:700 11px inherit; cursor:pointer; }
+  .admin-group-items{ display:none; margin-top:10px; }
+  .admin-group-card.open .admin-group-items{ display:block; }
+  .admin-group-card.open{ border-color:var(--gold); }
+  .admin-items-stack{ display:flex; flex-direction:column; gap:7px; max-height:520px; overflow:auto; padding-right:2px; }
+  .admin-item{ display:flex; align-items:center; gap:9px; background:var(--panel); border:1px solid var(--panel-border); border-radius:9px; padding:9px 10px; min-width:0; }
+  .admin-item-main{ flex:1; min-width:0; }
+  .admin-item-title{ font-size:13px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .admin-item-sub{ font-size:11px; color:var(--muted); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .admin-item-ar{ font-family:'Amiri',serif; color:var(--arabic-dark); font-size:17px; flex:0 0 auto; }
+  .admin-item-actions{ display:flex; align-items:center; gap:4px; flex:0 0 auto; }
+  .admin-item-actions button{ border:1px solid var(--panel-border); background:none; border-radius:6px; cursor:pointer; font:700 11px inherit; padding:5px 7px; }
+  .admin-item-actions .mat-order-btn{ color:var(--gold-soft); }
+  .admin-item-actions .lesson-del-btn{ color:var(--rose); }
+  .admin-empty{ padding:18px; border:1px dashed var(--panel-border); border-radius:11px; text-align:center; color:var(--muted); font-size:12.5px; }
+  .admin-task-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
+  .admin-task-card{ background:var(--panel); border:1px solid var(--panel-border); border-radius:16px; padding:18px; min-width:0; }
+  .admin-task-list{ display:flex; flex-direction:column; gap:7px; max-height:500px; overflow:auto; }
+  .admin-filter-empty{ display:none; padding:14px; color:var(--muted); font-size:12px; text-align:center; }
+  .admin-filter-empty.show{ display:block; }
+  @media(max-width:850px){ .admin-section-grid,.admin-task-grid{ grid-template-columns:1fr; } .admin-content-head{ align-items:stretch; flex-direction:column; } .admin-search{ width:100%; max-width:none; } .admin-group-grid{ grid-template-columns:1fr; } }
+
   /* ---------- APP SHELL ---------- */
   #appScreen{ display:none; min-height:100vh; flex-direction:column; }
   header.topbar{
@@ -754,88 +804,79 @@
       </div>
 
       <div class="admin-view" id="adminViewMaterials">
-        <div class="admin-card">
-          <div class="admin-card-title">Карточки для повторения</div><div class="order-hint">Новые элементы добавляются в конец. Кнопки ↑ ↓ меняют порядок.</div>
-          <button class="mat-seed-btn" id="seedFlashcardsBtn">Загрузить стартовый набор (демо-карточки)</button>
-          <div class="mat-form-grid">
-            <div class="field"><label>Категория</label><input type="text" id="newCardCat" placeholder="Например, Еда" list="catList"><datalist id="catList"></datalist></div>
-            <div class="field"><label>Арабское слово</label><input type="text" id="newCardAr" placeholder="مثال"></div>
-            <div class="field"><label>Транслитерация</label><input type="text" id="newCardTranslit" placeholder="mithāl"></div>
-            <div class="field"><label>Перевод</label><input type="text" id="newCardRu" placeholder="Пример"></div>
-          </div>
-          <button class="btn-primary" id="addCardBtn" style="max-width:200px;">Добавить карточку</button>
-          <div class="login-error" id="cardError"></div>
-          <div style="margin-top:18px;" id="cardsList"></div>
+        <div class="admin-content-head">
+          <div><h2>Материалы</h2><p>Карточки и квизы собраны по группам, чтобы кабинет не превращался в длинный список.</p></div>
+          <div class="admin-search"><input id="materialsSearch" type="search" placeholder="Поиск по словам и квизам…"></div>
         </div>
+        <div class="admin-section-grid">
+          <section class="admin-section-card">
+            <div class="admin-section-head">
+              <div><div class="admin-section-title"><span class="admin-section-icon">🗂️</span>Карточки</div><div class="admin-section-meta" id="cardsMeta">По категориям</div></div>
+              <button class="admin-create-toggle" data-target="cardCreatePanel">+ Добавить</button>
+            </div>
+            <div class="admin-create-panel" id="cardCreatePanel">
+              <button class="mat-seed-btn" id="seedFlashcardsBtn">Загрузить стартовый набор</button>
+              <div class="mat-form-grid">
+                <div class="field"><label>Категория</label><input type="text" id="newCardCat" placeholder="Например, Еда" list="catList"><datalist id="catList"></datalist></div>
+                <div class="field"><label>Арабское слово</label><input type="text" id="newCardAr" placeholder="مثال"></div>
+                <div class="field"><label>Транслитерация</label><input type="text" id="newCardTranslit" placeholder="mithāl"></div>
+                <div class="field"><label>Перевод</label><input type="text" id="newCardRu" placeholder="Пример"></div>
+              </div>
+              <button class="btn-primary" id="addCardBtn" style="max-width:200px;">Добавить карточку</button>
+              <div class="login-error" id="cardError"></div>
+            </div>
+            <div id="cardsList"></div>
+            <div class="admin-filter-empty" id="cardsFilterEmpty">Ничего не найдено.</div>
+          </section>
 
-        <div class="admin-card">
-          <div class="admin-card-title">Вопросы для квиза</div><div class="order-hint">Новые элементы добавляются в конец. Кнопки ↑ ↓ меняют порядок.</div>
-          <button class="mat-seed-btn" id="seedQuizBtn">Загрузить стартовый набор (демо-вопросы)</button>
-          <div class="field"><label>Название квиза</label><input type="text" id="newQQuizName" placeholder="Например, Алфавит и базовая лексика" list="quizNameList"><datalist id="quizNameList"></datalist></div>
-          <div class="field"><label>Арабское слово (необязательно)</label><input type="text" id="newQAr" placeholder="Оставьте пустым, если не нужно"></div>
-          <div class="field"><label>Текст вопроса</label><input type="text" id="newQText" placeholder="Что означает это слово?"></div>
-          <div class="mat-form-grid">
-            <div class="field"><label>Вариант 1</label><input type="text" id="newQOpt0"></div>
-            <div class="field"><label>Вариант 2</label><input type="text" id="newQOpt1"></div>
-            <div class="field"><label>Вариант 3</label><input type="text" id="newQOpt2"></div>
-          </div>
-          <div class="radio-row">
-            <label><input type="radio" name="newQCorrect" value="0" checked> Верный: вариант 1</label>
-            <label><input type="radio" name="newQCorrect" value="1"> Верный: вариант 2</label>
-            <label><input type="radio" name="newQCorrect" value="2"> Верный: вариант 3</label>
-          </div>
-          <button class="btn-primary" id="addQBtn" style="max-width:200px; margin-top:14px;">Добавить вопрос</button>
-          <div class="login-error" id="qError"></div>
-          <div style="margin-top:18px;" id="quizList"></div>
+          <section class="admin-section-card">
+            <div class="admin-section-head">
+              <div><div class="admin-section-title"><span class="admin-section-icon">📝</span>Квизы</div><div class="admin-section-meta" id="quizMeta">По названиям квизов</div></div>
+              <button class="admin-create-toggle" data-target="quizCreatePanel">+ Добавить</button>
+            </div>
+            <div class="admin-create-panel" id="quizCreatePanel">
+              <button class="mat-seed-btn" id="seedQuizBtn">Загрузить стартовый набор</button>
+              <div class="field"><label>Название квиза</label><input type="text" id="newQQuizName" placeholder="Например, Алфавит и базовая лексика" list="quizNameList"><datalist id="quizNameList"></datalist></div>
+              <div class="field"><label>Арабское слово (необязательно)</label><input type="text" id="newQAr" placeholder="Оставьте пустым, если не нужно"></div>
+              <div class="field"><label>Текст вопроса</label><input type="text" id="newQText" placeholder="Что означает это слово?"></div>
+              <div class="mat-form-grid">
+                <div class="field"><label>Вариант 1</label><input type="text" id="newQOpt0"></div><div class="field"><label>Вариант 2</label><input type="text" id="newQOpt1"></div><div class="field"><label>Вариант 3</label><input type="text" id="newQOpt2"></div>
+              </div>
+              <div class="radio-row"><label><input type="radio" name="newQCorrect" value="0" checked> Верный: вариант 1</label><label><input type="radio" name="newQCorrect" value="1"> Верный: вариант 2</label><label><input type="radio" name="newQCorrect" value="2"> Верный: вариант 3</label></div>
+              <button class="btn-primary" id="addQBtn" style="max-width:200px; margin-top:14px;">Добавить вопрос</button><div class="login-error" id="qError"></div>
+            </div>
+            <div id="quizList"></div>
+            <div class="admin-filter-empty" id="quizFilterEmpty">Ничего не найдено.</div>
+          </section>
         </div>
       </div>
 
       <div class="admin-view" id="adminViewContent">
-        <div class="admin-card">
-          <div class="admin-card-title">Уроки</div><div class="order-hint">Новые элементы добавляются в конец. Кнопки ↑ ↓ меняют порядок.</div>
-          <div class="field"><label>Заголовок</label><input type="text" id="newLessonTitle" placeholder="Например, Урок 1. Приветствия"></div>
-          <div class="field"><label>Текст урока</label><textarea id="newLessonBody" rows="4" style="width:100%; background:var(--panel-light); border:1px solid var(--panel-border); border-radius:9px; padding:11px 13px; color:var(--text); font-size:14px; font-family:inherit; resize:vertical;" placeholder="Текст, который увидит ученик"></textarea></div>
-          <button class="btn-primary" id="addLessonNoteBtn" style="max-width:200px;">Добавить урок</button>
-          <div class="login-error" id="lessonNoteError"></div>
-          <div style="margin-top:18px;" id="lessonNotesList"></div>
-        </div>
-        <div class="admin-card">
-          <div class="admin-card-title">Грамматика</div><div class="order-hint">Новые элементы добавляются в конец. Кнопки ↑ ↓ меняют порядок.</div>
-          <div class="field"><label>Заголовок темы</label><input type="text" id="newGrammarTitle" placeholder="Например, Определённый артикль ال"></div>
-          <div class="field"><label>Объяснение</label><textarea id="newGrammarBody" rows="4" style="width:100%; background:var(--panel-light); border:1px solid var(--panel-border); border-radius:9px; padding:11px 13px; color:var(--text); font-size:14px; font-family:inherit; resize:vertical;" placeholder="Текст объяснения темы"></textarea></div>
-          <button class="btn-primary" id="addGrammarNoteBtn" style="max-width:200px;">Добавить тему</button>
-          <div class="login-error" id="grammarNoteError"></div>
-          <div style="margin-top:18px;" id="grammarNotesList"></div>
+        <div class="admin-content-head"><div><h2>Уроки и грамматика</h2><p>Каждая тема — отдельная компактная карточка. Порядок по-прежнему меняется кнопками ↑ ↓.</p></div><div class="admin-search"><input id="contentSearch" type="search" placeholder="Поиск по урокам и темам…"></div></div>
+        <div class="admin-section-grid">
+          <section class="admin-section-card"><div class="admin-section-head"><div><div class="admin-section-title"><span class="admin-section-icon">📖</span>Уроки</div><div class="admin-section-meta" id="lessonsMeta">0 уроков</div></div><button class="admin-create-toggle" data-target="lessonCreatePanel">+ Добавить</button></div>
+            <div class="admin-create-panel" id="lessonCreatePanel"><div class="field"><label>Заголовок</label><input type="text" id="newLessonTitle" placeholder="Например, Урок 1. Приветствия"></div><div class="field"><label>Текст урока</label><textarea id="newLessonBody" rows="4" style="width:100%;background:var(--panel);border:1px solid var(--panel-border);border-radius:9px;padding:11px 13px;color:var(--text);font-size:14px;font-family:inherit;resize:vertical;" placeholder="Текст, который увидит ученик"></textarea></div><button class="btn-primary" id="addLessonNoteBtn" style="max-width:200px;">Добавить урок</button><div class="login-error" id="lessonNoteError"></div></div>
+            <div id="lessonNotesList"></div><div class="admin-filter-empty" id="lessonsFilterEmpty">Ничего не найдено.</div>
+          </section>
+          <section class="admin-section-card"><div class="admin-section-head"><div><div class="admin-section-title"><span class="admin-section-icon">📐</span>Грамматика</div><div class="admin-section-meta" id="grammarMeta">0 тем</div></div><button class="admin-create-toggle" data-target="grammarCreatePanel">+ Добавить</button></div>
+            <div class="admin-create-panel" id="grammarCreatePanel"><div class="field"><label>Заголовок темы</label><input type="text" id="newGrammarTitle" placeholder="Например, Определённый артикль ال"></div><div class="field"><label>Объяснение</label><textarea id="newGrammarBody" rows="4" style="width:100%;background:var(--panel);border:1px solid var(--panel-border);border-radius:9px;padding:11px 13px;color:var(--text);font-size:14px;font-family:inherit;resize:vertical;" placeholder="Текст объяснения темы"></textarea></div><button class="btn-primary" id="addGrammarNoteBtn" style="max-width:200px;">Добавить тему</button><div class="login-error" id="grammarNoteError"></div></div>
+            <div id="grammarNotesList"></div><div class="admin-filter-empty" id="grammarFilterEmpty">Ничего не найдено.</div>
+          </section>
         </div>
       </div>
 
       <div class="admin-view" id="adminViewTasks">
-        <div class="admin-card">
-          <div class="admin-card-title">🎧 Аудирование</div>
-          <div class="field"><label>Заголовок</label><input type="text" id="newListenTitle" placeholder="Например, Диалог в кафе"></div>
-          <div class="field"><label>Описание задания</label><textarea id="newListenBody" rows="3" style="width:100%; background:var(--panel-light); border:1px solid var(--panel-border); border-radius:9px; padding:11px 13px; color:var(--text); font-size:14px; font-family:inherit; resize:vertical;" placeholder="Что нужно сделать ученику"></textarea></div>
-          <div class="field"><label>Ссылка на аудио (необязательно)</label><input type="text" id="newListenLink" placeholder="https://..."></div>
-          <button class="btn-primary" id="addListenBtn" style="max-width:200px;">Добавить задание</button>
-          <div class="login-error" id="listenError"></div>
-          <div style="margin-top:18px;" id="listenTasksList"></div>
-        </div>
-        <div class="admin-card">
-          <div class="admin-card-title">📖 Чтение</div>
-          <div class="field"><label>Заголовок</label><input type="text" id="newReadTitle" placeholder="Например, Текст о Каире"></div>
-          <div class="field"><label>Текст / описание задания</label><textarea id="newReadBody" rows="3" style="width:100%; background:var(--panel-light); border:1px solid var(--panel-border); border-radius:9px; padding:11px 13px; color:var(--text); font-size:14px; font-family:inherit; resize:vertical;" placeholder="Текст для чтения или инструкция"></textarea></div>
-          <div class="field"><label>Ссылка (необязательно)</label><input type="text" id="newReadLink" placeholder="https://..."></div>
-          <button class="btn-primary" id="addReadBtn" style="max-width:200px;">Добавить задание</button>
-          <div class="login-error" id="readError"></div>
-          <div style="margin-top:18px;" id="readTasksList"></div>
-        </div>
-        <div class="admin-card">
-          <div class="admin-card-title">✍️ Письмо</div>
-          <div class="field"><label>Заголовок</label><input type="text" id="newWriteTitle" placeholder="Например, Напишите о своей семье"></div>
-          <div class="field"><label>Описание задания</label><textarea id="newWriteBody" rows="3" style="width:100%; background:var(--panel-light); border:1px solid var(--panel-border); border-radius:9px; padding:11px 13px; color:var(--text); font-size:14px; font-family:inherit; resize:vertical;" placeholder="Что нужно написать ученику"></textarea></div>
-          <div class="field"><label>Ссылка (необязательно)</label><input type="text" id="newWriteLink" placeholder="https://..."></div>
-          <button class="btn-primary" id="addWriteBtn" style="max-width:200px;">Добавить задание</button>
-          <div class="login-error" id="writeError"></div>
-          <div style="margin-top:18px;" id="writeTasksList"></div>
+        <div class="admin-content-head"><div><h2>Задания</h2><p>Аудирование, чтение и письмо разделены на три самостоятельных блока.</p></div><div class="admin-search"><input id="tasksSearch" type="search" placeholder="Поиск по заданиям…"></div></div>
+        <div class="admin-task-grid">
+          <section class="admin-task-card"><div class="admin-section-head"><div><div class="admin-section-title"><span class="admin-section-icon">🎧</span>Аудирование</div><div class="admin-section-meta" id="listenMeta">0 заданий</div></div><button class="admin-create-toggle" data-target="listenCreatePanel">+ Добавить</button></div>
+            <div class="admin-create-panel" id="listenCreatePanel"><div class="field"><label>Заголовок</label><input type="text" id="newListenTitle" placeholder="Например, Диалог в кафе"></div><div class="field"><label>Описание задания</label><textarea id="newListenBody" rows="3" style="width:100%;background:var(--panel);border:1px solid var(--panel-border);border-radius:9px;padding:11px 13px;color:var(--text);font-size:14px;font-family:inherit;resize:vertical;" placeholder="Что нужно сделать ученику"></textarea></div><div class="field"><label>Ссылка на аудио (необязательно)</label><input type="text" id="newListenLink" placeholder="https://..."></div><button class="btn-primary" id="addListenBtn" style="max-width:200px;">Добавить задание</button><div class="login-error" id="listenError"></div></div><div class="admin-task-list" id="listenTasksList"></div>
+          </section>
+          <section class="admin-task-card"><div class="admin-section-head"><div><div class="admin-section-title"><span class="admin-section-icon">📖</span>Чтение</div><div class="admin-section-meta" id="readMeta">0 заданий</div></div><button class="admin-create-toggle" data-target="readCreatePanel">+ Добавить</button></div>
+            <div class="admin-create-panel" id="readCreatePanel"><div class="field"><label>Заголовок</label><input type="text" id="newReadTitle" placeholder="Например, Текст о Каире"></div><div class="field"><label>Текст / описание задания</label><textarea id="newReadBody" rows="3" style="width:100%;background:var(--panel);border:1px solid var(--panel-border);border-radius:9px;padding:11px 13px;color:var(--text);font-size:14px;font-family:inherit;resize:vertical;" placeholder="Текст для чтения или инструкция"></textarea></div><div class="field"><label>Ссылка (необязательно)</label><input type="text" id="newReadLink" placeholder="https://..."></div><button class="btn-primary" id="addReadBtn" style="max-width:200px;">Добавить задание</button><div class="login-error" id="readError"></div></div><div class="admin-task-list" id="readTasksList"></div>
+          </section>
+          <section class="admin-task-card"><div class="admin-section-head"><div><div class="admin-section-title"><span class="admin-section-icon">✍️</span>Письмо</div><div class="admin-section-meta" id="writeMeta">0 заданий</div></div><button class="admin-create-toggle" data-target="writeCreatePanel">+ Добавить</button></div>
+            <div class="admin-create-panel" id="writeCreatePanel"><div class="field"><label>Заголовок</label><input type="text" id="newWriteTitle" placeholder="Например, Напишите о своей семье"></div><div class="field"><label>Описание задания</label><textarea id="newWriteBody" rows="3" style="width:100%;background:var(--panel);border:1px solid var(--panel-border);border-radius:9px;padding:11px 13px;color:var(--text);font-size:14px;font-family:inherit;resize:vertical;" placeholder="Что нужно написать ученику"></textarea></div><div class="field"><label>Ссылка (необязательно)</label><input type="text" id="newWriteLink" placeholder="https://..."></div><button class="btn-primary" id="addWriteBtn" style="max-width:200px;">Добавить задание</button><div class="login-error" id="writeError"></div></div><div class="admin-task-list" id="writeTasksList"></div>
+          </section>
         </div>
       </div>
     </main>
@@ -1889,62 +1930,51 @@ async function renderHomeworkBanner(){
   banner.classList.add('show');
 }
 
+function escapeHtml(value){return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+function setupAdminSearch(inputId,containerIds,emptyIds){const input=document.getElementById(inputId);if(!input)return;input.oninput=()=>{const q=input.value.trim().toLowerCase();containerIds.forEach((id,i)=>{const root=document.getElementById(id);if(!root)return;let visible=0;const groups=root.querySelectorAll('[data-search-group]');if(groups.length){groups.forEach(group=>{const own=(group.dataset.searchGroup||'');const items=[...group.querySelectorAll('[data-search-item]')];const groupMatch=!q||own.includes(q);let itemMatch=0;items.forEach(item=>{const match=!q||groupMatch||(item.dataset.searchItem||'').includes(q);item.style.display=match?'':'none';if(match)itemMatch++;});const show=groupMatch||itemMatch>0;group.style.display=show?'':'none';if(show)visible++;});}else{root.querySelectorAll('[data-search-item]').forEach(item=>{const match=!q||(item.dataset.searchItem||'').includes(q);item.style.display=match?'':'none';if(match)visible++;});}if(emptyIds[i])document.getElementById(emptyIds[i])?.classList.toggle('show',!!q&&visible===0);});};}
+document.querySelectorAll('.admin-create-toggle').forEach(btn=>btn.addEventListener('click',()=>{const panel=document.getElementById(btn.dataset.target);const open=panel.classList.toggle('open');btn.textContent=open?'Закрыть':' + Добавить';}));
+
 /* ================= MATERIALS MANAGEMENT (admin) ================= */
 async function renderMaterialsAdmin(){
   const cardsMap = await loadFlashcardsData();
   const quizzesMap = await loadQuizzesData();
+  const catList = document.getElementById('catList');
+  const quizNameList = document.getElementById('quizNameList');
+  if(catList) catList.innerHTML = Object.keys(cardsMap).map(c=>`<option value="${escapeHtml(c)}">`).join('');
+  if(quizNameList) quizNameList.innerHTML = Object.keys(quizzesMap).map(n=>`<option value="${escapeHtml(n)}">`).join('');
 
-  // populate category / quiz name datalists
-  document.getElementById('catList').innerHTML = Object.keys(cardsMap).map(c=>`<option value="${c}">`).join('');
-  document.getElementById('quizNameList').innerHTML = Object.keys(quizzesMap).map(n=>`<option value="${n}">`).join('');
+  const cardsListEl=document.getElementById('cardsList'), cardGroups=Object.entries(cardsMap);
+  document.getElementById('cardsMeta').textContent = `${cardGroups.length} категорий · ${cardGroups.reduce((n,[,a])=>n+a.length,0)} слов`;
+  cardsListEl.innerHTML = !cardGroups.length ? '<div class="admin-empty">Пока нет карточек. Создай первую категорию.</div>' : `<div class="admin-group-grid">${cardGroups.map(([cat,arr])=>`
+    <div class="admin-group-card" data-group-card="${escapeHtml(cat)}" data-search-group="${escapeHtml(cat).toLowerCase()}">
+      <div class="admin-group-card-head"><div class="admin-group-name">📁 ${escapeHtml(cat)}</div><div class="admin-group-count">${arr.length} слов</div></div>
+      <button class="admin-group-open" type="button" data-toggle-group>Открыть слова ↓</button>
+      <div class="admin-group-items"><div class="admin-items-stack">${arr.map(c=>`
+        <div class="admin-item" data-search-item="${escapeHtml((c.ar+' '+c.translit+' '+c.ru+' '+cat).toLowerCase())}">
+          <span class="admin-item-ar arabic">${escapeHtml(c.ar)}</span><div class="admin-item-main"><div class="admin-item-title">${escapeHtml(c.ru)}</div><div class="admin-item-sub">${escapeHtml(c.translit||'')}</div></div>
+          <div class="admin-item-actions"><button class="mat-order-btn" data-move-card="-1" data-move-id="${c.id}" data-move-group="${escapeHtml(cat)}">↑</button><button class="mat-order-btn" data-move-card="1" data-move-id="${c.id}" data-move-group="${escapeHtml(cat)}">↓</button><button class="lesson-del-btn" data-del-card="${c.id}">Удалить</button></div>
+        </div>`).join('')}</div></div>
+    </div>`).join('')}</div>`;
 
-  const cardsListEl = document.getElementById('cardsList');
-  const allCards = Object.entries(cardsMap).flatMap(([cat, arr]) => arr.map(c => ({...c, category:cat})));
-  if(!allCards.length){
-    cardsListEl.innerHTML = '<div class="empty-state">Пока нет карточек.</div>';
-  } else {
-    cardsListEl.innerHTML = allCards.map(c => `
-      <div class="mat-list-item">
-        <div class="mat-list-item-body">
-          <div class="mat-list-cat">${c.category}</div>
-          <div class="mat-list-main"><span class="mat-list-ar arabic">${c.ar}</span><span class="mat-list-sub">${c.translit} — ${c.ru}</span></div>
-        </div>
-        <div class="mat-order-actions"><button class="mat-order-btn" data-move-card="-1" data-move-id="${c.id}" data-move-group="${c.category}">↑</button><button class="mat-order-btn" data-move-card="1" data-move-id="${c.id}" data-move-group="${c.category}">↓</button><button class="lesson-del-btn" data-del-card="${c.id}">Удалить</button></div>
-      </div>`).join('');
-    cardsListEl.querySelectorAll('[data-del-card]').forEach(btn=>{
-      btn.addEventListener('click', async ()=>{
-        await db.collection('flashcards').doc(btn.dataset.delCard).delete();
-        await renderMaterialsAdmin();
-      });
-    });
-  }
+  const quizListEl=document.getElementById('quizList'), quizNames=Object.keys(quizzesMap);
+  document.getElementById('quizMeta').textContent = `${quizNames.length} квизов · ${quizNames.reduce((n,k)=>n+quizzesMap[k].length,0)} вопросов`;
+  quizListEl.innerHTML = !quizNames.length ? '<div class="admin-empty">Пока нет квизов. Создай первый вопрос.</div>' : `<div class="admin-group-grid">${quizNames.map(name=>`
+    <div class="admin-group-card" data-search-group="${escapeHtml(name.toLowerCase())}">
+      <div class="admin-group-card-head"><div class="admin-group-name">📝 ${escapeHtml(name)}</div><div class="admin-group-count">${quizzesMap[name].length} вопросов</div></div>
+      <button class="admin-group-open" type="button" data-toggle-group>Открыть вопросы ↓</button>
+      <div class="admin-group-items"><div class="admin-items-stack">${quizzesMap[name].map(q=>`
+        <div class="admin-item" data-search-item="${escapeHtml(((q.ar||'')+' '+q.q+' '+name).toLowerCase())}">
+          ${q.ar?`<span class="admin-item-ar arabic">${escapeHtml(q.ar)}</span>`:''}<div class="admin-item-main"><div class="admin-item-title">${escapeHtml(q.q)}</div><div class="admin-item-sub">${q.options.map((o,i)=>i===q.correct?`${escapeHtml(o)} ✓`:escapeHtml(o)).join(' · ')}</div></div>
+          <div class="admin-item-actions"><button class="mat-order-btn" data-move-q="-1" data-move-id="${q.id}" data-move-group="${escapeHtml(name)}">↑</button><button class="mat-order-btn" data-move-q="1" data-move-id="${q.id}" data-move-group="${escapeHtml(name)}">↓</button><button class="lesson-del-btn" data-del-q="${q.id}">Удалить</button></div>
+        </div>`).join('')}</div></div>
+    </div>`).join('')}</div>`;
 
-  const quizListEl = document.getElementById('quizList');
-  const quizNames = Object.keys(quizzesMap);
-  if(!quizNames.length){
-    quizListEl.innerHTML = '<div class="empty-state">Пока нет вопросов.</div>';
-  } else {
-    quizListEl.innerHTML = quizNames.map(name => `
-      <div style="margin-bottom:16px;">
-        <div class="mat-list-cat" style="margin-bottom:6px;">${name} (${quizzesMap[name].length})</div>
-        ${quizzesMap[name].map(q => `
-          <div class="mat-list-item">
-            <div class="mat-list-item-body">
-              <div class="mat-list-main">${q.ar ? `<span class="mat-list-ar arabic">${q.ar}</span>` : ''}<span class="mat-list-sub">${q.q}</span></div>
-              <div class="mat-q-options">${q.options.map((o,i)=> i===q.correct ? `<span class="mat-q-correct">${o} ✓</span>` : o).join(' · ')}</div>
-            </div>
-            <div class="mat-order-actions"><button class="mat-order-btn" data-move-q="-1" data-move-id="${q.id}" data-move-group="${name}">↑</button><button class="mat-order-btn" data-move-q="1" data-move-id="${q.id}" data-move-group="${name}">↓</button><button class="lesson-del-btn" data-del-q="${q.id}">Удалить</button></div>
-          </div>`).join('')}
-      </div>`).join('');
-    quizListEl.querySelectorAll('[data-del-q]').forEach(btn=>{
-      btn.addEventListener('click', async ()=>{
-        await db.collection('quizQuestions').doc(btn.dataset.delQ).delete();
-        await renderMaterialsAdmin();
-      });
-    });
-    quizListEl.querySelectorAll('[data-move-q]').forEach(btn=>btn.addEventListener('click',async()=>moveItem('quizQuestions',btn.dataset.moveId,Number(btn.dataset.moveQ),'quizName',btn.dataset.moveGroup,renderMaterialsAdmin)));
-  }
+  document.querySelectorAll('[data-toggle-group]').forEach(btn=>btn.addEventListener('click',()=>{ const card=btn.closest('.admin-group-card'); const open=card.classList.toggle('open'); btn.textContent=open?'Свернуть ↑':'Открыть ↓'; }));
+  cardsListEl.querySelectorAll('[data-del-card]').forEach(btn=>btn.addEventListener('click',async()=>{await db.collection('flashcards').doc(btn.dataset.delCard).delete();await renderMaterialsAdmin();}));
+  quizListEl.querySelectorAll('[data-del-q]').forEach(btn=>btn.addEventListener('click',async()=>{await db.collection('quizQuestions').doc(btn.dataset.delQ).delete();await renderMaterialsAdmin();}));
   cardsListEl.querySelectorAll('[data-move-card]').forEach(btn=>btn.addEventListener('click',async()=>moveItem('flashcards',btn.dataset.moveId,Number(btn.dataset.moveCard),'category',btn.dataset.moveGroup,renderMaterialsAdmin)));
+  quizListEl.querySelectorAll('[data-move-q]').forEach(btn=>btn.addEventListener('click',async()=>moveItem('quizQuestions',btn.dataset.moveId,Number(btn.dataset.moveQ),'quizName',btn.dataset.moveGroup,renderMaterialsAdmin)));
+  setupAdminSearch('materialsSearch',['cardsList','quizList'],['cardsFilterEmpty','quizFilterEmpty']);
 }
 
 
@@ -2206,28 +2236,19 @@ async function renderWritingList(){ renderTaskListInto('writingList', await load
 
 /* ---- ADMIN: content management ---- */
 async function renderContentAdmin(){
-  const lessons = await loadLessonNotes();
-  const grammar = await loadGrammarNotes();
-  const lEl = document.getElementById('lessonNotesList');
-  lEl.innerHTML = !lessons.length ? '<div class="empty-state">Пока нет дополнительных уроков (Урок 1 — Алфавит есть всегда).</div>' : lessons.map(l=>`
-    <div class="mat-list-item">
-      <div class="mat-list-item-body"><div class="mat-list-sub" style="font-weight:700; color:var(--text);">${l.title}</div></div>
-      <div class="mat-order-actions"><button class="mat-order-btn" data-move="-1" data-move-id="${l.id}">↑</button><button class="mat-order-btn" data-move="1" data-move-id="${l.id}">↓</button><button class="lesson-del-btn" data-del-lesson="${l.id}">Удалить</button></div>
-    </div>`).join('');
-  lEl.querySelectorAll('[data-del-lesson]').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{ await db.collection('lessonNotes').doc(btn.dataset.delLesson).delete(); await renderContentAdmin(); });
-  });
-  const gEl = document.getElementById('grammarNotesList');
-  gEl.innerHTML = !grammar.length ? '<div class="empty-state">Пока нет тем.</div>' : grammar.map(g=>`
-    <div class="mat-list-item">
-      <div class="mat-list-item-body"><div class="mat-list-sub" style="font-weight:700; color:var(--text);">${g.title}</div></div>
-      <div class="mat-order-actions"><button class="mat-order-btn" data-move="-1" data-move-id="${g.id}">↑</button><button class="mat-order-btn" data-move="1" data-move-id="${g.id}">↓</button><button class="lesson-del-btn" data-del-grammar="${g.id}">Удалить</button></div>
-    </div>`).join('');
-  gEl.querySelectorAll('[data-del-grammar]').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{ await db.collection('grammarNotes').doc(btn.dataset.delGrammar).delete(); await renderContentAdmin(); });
-  });  lEl.querySelectorAll('[data-move]').forEach(btn=>btn.addEventListener('click',async()=>moveItem('lessonNotes',btn.dataset.moveId,Number(btn.dataset.move),null,null,renderContentAdmin)));
-  gEl.querySelectorAll('[data-move]').forEach(btn=>btn.addEventListener('click',async()=>moveItem('grammarNotes',btn.dataset.moveId,Number(btn.dataset.move),null,null,renderContentAdmin)));
+  const lessons=await loadLessonNotes(), grammar=await loadGrammarNotes();
+  document.getElementById('lessonsMeta').textContent=`${lessons.length} ${lessons.length===1?'урок':'уроков'}`;
+  document.getElementById('grammarMeta').textContent=`${grammar.length} ${grammar.length===1?'тема':'тем'}`;
+  const renderSimple=(list,el,empty,collection,delAttr,delMsg)=>{
+    el.innerHTML=!list.length?`<div class="admin-empty">${empty}</div>`:`<div class="admin-items-stack">${list.map(x=>`<div class="admin-item" data-search-item="${escapeHtml((x.title||'').toLowerCase())}"><div class="admin-item-main"><div class="admin-item-title">${escapeHtml(x.title)}</div><div class="admin-item-sub">Нажми ↑ ↓, чтобы изменить порядок</div></div><div class="admin-item-actions"><button class="mat-order-btn" data-move="-1" data-move-id="${x.id}">↑</button><button class="mat-order-btn" data-move="1" data-move-id="${x.id}">↓</button><button class="lesson-del-btn" ${delAttr}="${x.id}">Удалить</button></div></div>`).join('')}</div>`;
+    el.querySelectorAll(`[${delAttr}]`).forEach(btn=>btn.addEventListener('click',async()=>{await db.collection(collection).doc(btn.getAttribute(delAttr)).delete();await renderContentAdmin();}));
+    el.querySelectorAll('[data-move]').forEach(btn=>btn.addEventListener('click',async()=>moveItem(collection,btn.dataset.moveId,Number(btn.dataset.move),null,null,renderContentAdmin)));
+  };
+  renderSimple(lessons,document.getElementById('lessonNotesList'),'Пока нет дополнительных уроков.','lessonNotes','data-del-lesson');
+  renderSimple(grammar,document.getElementById('grammarNotesList'),'Пока нет грамматических тем.','grammarNotes','data-del-grammar');
+  setupAdminSearch('contentSearch',['lessonNotesList','grammarNotesList'],['lessonsFilterEmpty','grammarFilterEmpty']);
 }
+
 
 document.getElementById('addLessonNoteBtn').addEventListener('click', async ()=>{
   const errEl = document.getElementById('lessonNoteError');
@@ -2255,27 +2276,15 @@ document.getElementById('addGrammarNoteBtn').addEventListener('click', async ()=
 });
 
 /* ---- ADMIN: tasks (listening/reading/writing) ---- */
-function taskAdminRow(t, collection, refreshFn){
-  return `
-    <div class="mat-list-item">
-      <div class="mat-list-item-body"><div class="mat-list-sub" style="font-weight:700; color:var(--text);">${t.title}</div></div>
-      <div class="mat-order-actions"><button class="mat-order-btn" data-move-task="-1" data-move-id="${t.id}" data-coll="${collection}">↑</button><button class="mat-order-btn" data-move-task="1" data-move-id="${t.id}" data-coll="${collection}">↓</button><button class="lesson-del-btn" data-del-task="${t.id}" data-coll="${collection}">Удалить</button></div>
-    </div>`;
-}
+function taskAdminRow(t,collection){return `<div class="admin-item" data-search-item="${escapeHtml((t.title+' '+(t.body||'')).toLowerCase())}"><div class="admin-item-main"><div class="admin-item-title">${escapeHtml(t.title)}</div><div class="admin-item-sub">${escapeHtml((t.body||'').slice(0,90))}</div></div><div class="admin-item-actions"><button class="mat-order-btn" data-move-task="-1" data-move-id="${t.id}" data-coll="${collection}">↑</button><button class="mat-order-btn" data-move-task="1" data-move-id="${t.id}" data-coll="${collection}">↓</button><button class="lesson-del-btn" data-del-task="${t.id}" data-coll="${collection}">Удалить</button></div></div>`;}
 async function renderTasksAdmin(){
-  const listen = await loadTasks('listeningTasks');
-  const read = await loadTasks('readingTasks');
-  const write = await loadTasks('writingTasks');
-  document.getElementById('listenTasksList').innerHTML = !listen.length ? '<div class="empty-state">Пока нет заданий.</div>' : listen.map(t=>taskAdminRow(t,'listeningTasks')).join('');
-  document.getElementById('readTasksList').innerHTML = !read.length ? '<div class="empty-state">Пока нет заданий.</div>' : read.map(t=>taskAdminRow(t,'readingTasks')).join('');
-  document.getElementById('writeTasksList').innerHTML = !write.length ? '<div class="empty-state">Пока нет заданий.</div>' : write.map(t=>taskAdminRow(t,'writingTasks')).join('');
-  document.querySelectorAll('[data-del-task]').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      await db.collection(btn.dataset.coll).doc(btn.dataset.delTask).delete();
-      await renderTasksAdmin();
-    });
-  });
+  const sets=[['listeningTasks','listenTasksList','listenMeta'],['readingTasks','readTasksList','readMeta'],['writingTasks','writeTasksList','writeMeta']];
+  for(const [collection,elId,metaId] of sets){const list=await loadTasks(collection);document.getElementById(metaId).textContent=`${list.length} ${list.length===1?'задание':'заданий'}`;document.getElementById(elId).innerHTML=list.length?list.map(t=>taskAdminRow(t,collection)).join(''):'<div class="admin-empty">Пока нет заданий.</div>';}
+  document.querySelectorAll('[data-del-task]').forEach(btn=>btn.addEventListener('click',async()=>{await db.collection(btn.dataset.coll).doc(btn.dataset.delTask).delete();await renderTasksAdmin();}));
+  document.querySelectorAll('[data-move-task]').forEach(btn=>btn.addEventListener('click',async()=>moveItem(btn.dataset.coll,btn.dataset.moveId,Number(btn.dataset.moveTask),null,null,renderTasksAdmin)));
+  setupAdminSearch('tasksSearch',['listenTasksList','readTasksList','writeTasksList'],[]);
 }
+
 document.getElementById('addListenBtn').addEventListener('click', async ()=>{
   const errEl = document.getElementById('listenError');
   const title = document.getElementById('newListenTitle').value.trim();
