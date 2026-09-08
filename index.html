@@ -663,7 +663,7 @@
   /* ================= STICKER MASCOT ================= */
   .sticker-wrap{
     position:fixed; right:18px; bottom:18px; z-index:500;
-    display:flex; align-items:flex-end; gap:10px;
+    display:flex; flex-direction:column; align-items:flex-end;
     animation:stickerPop .35s ease;
   }
   .sticker-wrap.hidden{ display:none; }
@@ -673,7 +673,7 @@
   }
   .sticker-bubble{
     position:relative;
-    max-width:220px;
+    max-width:250px;
     background:var(--panel);
     border:1px solid var(--panel-border);
     border-radius:14px;
@@ -682,18 +682,28 @@
     line-height:1.4;
     color:var(--text);
     box-shadow:0 8px 24px rgba(30,58,43,0.18);
-    margin-bottom:6px;
+    margin-bottom:-4px;
+    margin-right:14px;
+  }
+  .sticker-bubble::before{
+    content:"";
+    position:absolute;
+    right:26px;
+    bottom:-12px;
+    width:0; height:0;
+    border-left:12px solid transparent;
+    border-right:12px solid transparent;
+    border-top:12px solid var(--panel-border);
   }
   .sticker-bubble::after{
     content:"";
     position:absolute;
-    right:22px;
-    bottom:-8px;
-    width:16px; height:16px;
-    background:var(--panel);
-    border-right:1px solid var(--panel-border);
-    border-bottom:1px solid var(--panel-border);
-    transform:rotate(45deg);
+    right:28px;
+    bottom:-10px;
+    width:0; height:0;
+    border-left:10px solid transparent;
+    border-right:10px solid transparent;
+    border-top:10px solid var(--panel);
   }
   .sticker-close{
     position:absolute;
@@ -707,6 +717,7 @@
     line-height:1;
     cursor:pointer;
     display:flex; align-items:center; justify-content:center;
+    z-index:2;
   }
   .sticker-close:hover{ background:var(--rose); }
   .sticker-hide-forever{
@@ -722,15 +733,15 @@
   }
   .sticker-hide-forever:hover{ color:var(--rose); }
   .sticker-img{
-    width:92px; height:92px;
+    width:150px; height:150px;
     object-fit:contain;
     filter:drop-shadow(0 6px 10px rgba(30,58,43,0.25));
     flex-shrink:0;
   }
   @media (max-width:480px){
     .sticker-wrap{ right:10px; bottom:10px; }
-    .sticker-bubble{ max-width:170px; font-size:12.5px; padding:10px 12px; }
-    .sticker-img{ width:72px; height:72px; }
+    .sticker-bubble{ max-width:190px; font-size:12.5px; padding:10px 12px; }
+    .sticker-img{ width:110px; height:110px; }
   }
 </style>
 
@@ -782,7 +793,7 @@
     <!-- STICKER MASCOT (главная страница) -->
     <div class="sticker-wrap" id="mainPageSticker">
       <div class="sticker-bubble">
-        Добро пожаловать в مَدار! Введите логин и код, которые вам дал преподаватель 🌿
+        Привет! Если вы здесь, значит, Арабский язык уже ждёт вас. Это удивительный язык, но главное в нём — не правила, а ритм. Я собрал для вас самое важное, чтобы вы чувствовали прогресс с первого дня. Буду рад быть вашим гидом в этом путешествии!
         <br>
         <button class="sticker-hide-forever" id="stickerHideForever">Больше не показывать</button>
       </div>
