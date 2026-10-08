@@ -662,85 +662,117 @@
 
   /* ================= STICKER MASCOT ================= */
   .sticker-wrap{
-    position:fixed; right:18px; bottom:18px; z-index:500;
+    position:fixed; right:24px; bottom:12px; z-index:500;
     display:flex; flex-direction:column; align-items:flex-end;
-    animation:stickerPop .35s ease;
+    animation:stickerPop .4s ease;
+    transform-origin:bottom right;
   }
   .sticker-wrap.hidden{ display:none; }
+  .sticker-wrap.closing{ animation:stickerOut .35s ease forwards; pointer-events:none; }
   @keyframes stickerPop{
-    from{ opacity:0; transform:translateY(16px) scale(.9); }
+    from{ opacity:0; transform:translateY(24px) scale(.9); }
     to{ opacity:1; transform:translateY(0) scale(1); }
+  }
+  @keyframes stickerOut{
+    from{ opacity:1; transform:translateY(0) scale(1); }
+    to{ opacity:0; transform:translateY(40px) scale(.7); }
   }
   .sticker-bubble{
     position:relative;
-    max-width:250px;
+    width:440px; max-width:calc(100vw - 48px);
     background:var(--panel);
     border:1px solid var(--panel-border);
-    border-radius:14px;
-    padding:12px 14px;
-    font-size:13.5px;
-    line-height:1.4;
+    border-radius:18px;
+    padding:20px 24px 16px;
+    font-size:17px;
+    line-height:1.5;
     color:var(--text);
-    box-shadow:0 8px 24px rgba(30,58,43,0.18);
-    margin-bottom:-4px;
-    margin-right:14px;
+    text-align:justify;
+    hyphens:auto; -webkit-hyphens:auto;
+    box-shadow:0 10px 30px rgba(30,58,43,0.2);
+    margin-bottom:-6px;
+    margin-right:40px;
   }
+  .sticker-bubble .sticker-title{
+    display:block;
+    font-size:19px; font-weight:700;
+    color:var(--forest);
+    text-align:left;
+    margin-bottom:8px;
+  }
+  .sticker-bubble p{ margin:0 0 8px; }
   .sticker-bubble::before{
     content:"";
     position:absolute;
-    right:26px;
-    bottom:-12px;
+    right:100px;
+    bottom:-14px;
     width:0; height:0;
-    border-left:12px solid transparent;
-    border-right:12px solid transparent;
-    border-top:12px solid var(--panel-border);
+    border-left:14px solid transparent;
+    border-right:14px solid transparent;
+    border-top:14px solid var(--panel-border);
   }
   .sticker-bubble::after{
     content:"";
     position:absolute;
-    right:28px;
-    bottom:-10px;
+    right:102px;
+    bottom:-12px;
     width:0; height:0;
-    border-left:10px solid transparent;
-    border-right:10px solid transparent;
-    border-top:10px solid var(--panel);
+    border-left:12px solid transparent;
+    border-right:12px solid transparent;
+    border-top:12px solid var(--panel);
   }
   .sticker-close{
     position:absolute;
-    top:-8px; right:-8px;
-    width:22px; height:22px;
+    top:-10px; right:30px;
+    width:28px; height:28px;
     border-radius:50%;
     background:var(--forest);
     color:var(--cream-text);
     border:2px solid var(--panel);
-    font-size:13px;
+    font-size:15px;
     line-height:1;
     cursor:pointer;
     display:flex; align-items:center; justify-content:center;
     z-index:2;
+    transition:background .2s, transform .2s;
   }
-  .sticker-close:hover{ background:var(--rose); }
+  .sticker-close:hover{ background:var(--rose); transform:rotate(90deg); }
   .sticker-hide-forever{
     display:inline-block;
-    margin-top:8px;
-    font-size:11.5px;
+    margin-top:4px;
+    font-size:13px;
     color:var(--muted);
     text-decoration:underline;
     cursor:pointer;
     background:none;
     border:none;
     padding:0;
+    font-family:inherit;
   }
   .sticker-hide-forever:hover{ color:var(--rose); }
   .sticker-img{
-    width:150px; height:150px;
+    width:min(450px, 45vh); height:min(450px, 45vh);
     object-fit:contain;
-    filter:drop-shadow(0 6px 10px rgba(30,58,43,0.25));
+    filter:drop-shadow(0 8px 14px rgba(30,58,43,0.25));
     flex-shrink:0;
+  }
+  @media (max-width:900px){
+    .sticker-bubble{ width:320px; font-size:15px; padding:16px 18px 12px; margin-right:20px; }
+    .sticker-bubble .sticker-title{ font-size:16px; }
+    .sticker-bubble::before{ right:60px; }
+    .sticker-bubble::after{ right:62px; }
+    .sticker-close{ right:10px; }
+    .sticker-img{ width:min(260px, 32vh); height:min(260px, 32vh); }
   }
   @media (max-width:480px){
     .sticker-wrap{ right:10px; bottom:10px; }
-    .sticker-bubble{ max-width:190px; font-size:12.5px; padding:10px 12px; }
+    .sticker-bubble{ width:190px; font-size:12.5px; padding:10px 12px; margin-right:10px; }
+    .sticker-bubble .sticker-title{ font-size:13.5px; margin-bottom:4px; }
+    .sticker-bubble p{ margin-bottom:4px; }
+    .sticker-bubble::before{ right:30px; border-left-width:12px; border-right-width:12px; border-top-width:12px; bottom:-12px; }
+    .sticker-bubble::after{ right:32px; border-left-width:10px; border-right-width:10px; border-top-width:10px; bottom:-10px; }
+    .sticker-close{ width:22px; height:22px; font-size:13px; top:-8px; right:4px; }
+    .sticker-hide-forever{ font-size:11.5px; }
     .sticker-img{ width:110px; height:110px; }
   }
 </style>
@@ -757,7 +789,7 @@
     <div class="hero-word arabic">مَدار</div>
     <div class="hero-sub">madār — «орбита», «путь по кругу»</div>
     <div class="hero-title">Платформа для изучения арабского</div>
-    <div class="hero-desc">Алфавит, карточки, проверка знаний и отслеживание прогресса — в одном месте.</div>
+    <div class="hero-desc">Весь учебный материал в одном месте</div>
 
     <div class="login-card">
       <div class="role-toggle">
@@ -792,9 +824,11 @@
 
     <!-- STICKER MASCOT (главная страница) -->
     <div class="sticker-wrap" id="mainPageSticker">
-      <div class="sticker-bubble">
-        Привет! Если вы здесь, значит, Арабский язык уже ждёт вас. Это удивительный язык, но главное в нём — не правила, а ритм. Я собрал для вас самое важное, чтобы вы чувствовали прогресс с первого дня. Буду рад быть вашим гидом в этом путешествии!
-        <br>
+      <div class="sticker-bubble" lang="ru">
+        <span class="sticker-title">Добро пожаловать в «Мадар»!</span>
+        <p>Платформа для изучения арабского языка: уроки, материалы и упражнения — в одном месте.</p>
+        <p>Доступ открыт только моим ученикам.</p>
+        <p>Войдите, чтобы продолжить.</p>
         <button class="sticker-hide-forever" id="stickerHideForever">Больше не показывать</button>
       </div>
       <img class="sticker-img" src="images/stickermainpage.png" alt="Стикер" id="mainPageStickerImg">
@@ -2452,13 +2486,19 @@ document.getElementById('addWriteBtn').addEventListener('click', async ()=>{
     return;
   }
 
-  document.getElementById('stickerClose').addEventListener('click', ()=>{
-    wrap.classList.add('hidden');
-  });
+  function hideSticker(){
+    wrap.classList.add('closing');
+    let done = false;
+    const finish = ()=>{ if(done) return; done = true; wrap.classList.add('hidden'); wrap.classList.remove('closing'); };
+    wrap.addEventListener('animationend', finish, { once:true });
+    setTimeout(finish, 500);
+  }
+
+  document.getElementById('stickerClose').addEventListener('click', hideSticker);
 
   document.getElementById('stickerHideForever').addEventListener('click', ()=>{
-    localStorage.setItem(STORAGE_KEY, '1');
-    wrap.classList.add('hidden');
+    try{ localStorage.setItem(STORAGE_KEY, '1'); }catch(e){}
+    hideSticker();
   });
 })();
 </script>
